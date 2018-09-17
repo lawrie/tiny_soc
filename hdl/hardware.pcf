@@ -40,7 +40,7 @@
 # Left side of board
 set_io -nowarn pin_1 A2
 set_io -nowarn pin_2 A1
-set_io -nowarn pin_3 B1
+set_io -nowarn audio B1
 set_io -nowarn pin_4 C2
 set_io -nowarn pin_5 C1
 set_io -nowarn buttons[7] D2

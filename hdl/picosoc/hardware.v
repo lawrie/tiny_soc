@@ -22,8 +22,6 @@ module hardware (
 
     // onboard USB interface
     output pin_pu,
-    output pin_usbp,
-    output pin_usbn,
 
     // hardware UART
     output pin_1,
@@ -41,11 +39,10 @@ module hardware (
     inout  flash_io3,
 
     // GPIO buttons
-    inout  [7:0] buttons
+    inout  [7:0] buttons,
+    output audio
 );
-    assign pin_pu = 1'b1;
-    assign pin_usbp = 1'b0;
-    assign pin_usbn = 1'b0;
+    assign pin_pu = 1'b0;
 
     wire clk = clk_16mhz;
   
@@ -99,6 +96,9 @@ module hardware (
         .D_IN_0(gpio_buttons)
     );
 
+    reg [11:0] audio_out;
+    pdm_dac dac(.clk(clk), .din(audio_out), .dout(audio));
+
     always @(posedge clk) begin
         if (!resetn) begin
             gpio <= 0;
@@ -122,10 +122,25 @@ module hardware (
             end
 
             ///////////////////////////
-            // Template Peripheral
+            // Audio Peripheral
             ///////////////////////////
+
             if (iomem_valid && !iomem_ready && iomem_addr[31:24] == 8'h04) begin
                 iomem_ready <= 1;
+                iomem_rdata <= 32'h0;
+                if (iomem_wstrb[0]) audio_out[7:0] <= iomem_wdata[7:0];
+                if (iomem_wstrb[1]) audio_out[11:8] <= iomem_wdata[11:8];
+            end
+
+            ///////////////////////////
+            // Controller Peripheral
+            ///////////////////////////
+
+            if (iomem_valid && !iomem_ready && iomem_addr[31:24] == 8'h07) begin
+                iomem_ready <= 1;
+                if (iomem_addr[7:0] == 8'h00) begin
+                end else if (iomem_addr[7:0] == 8'h04) begin
+                end
                 iomem_rdata <= 32'h0;
             end
         end
