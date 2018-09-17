@@ -59,11 +59,11 @@ set_io -nowarn pin_16 D8
 set_io -nowarn pin_17 C9
 set_io -nowarn pin_18 A9
 set_io -nowarn pin_19 B8
-set_io -nowarn pin_20 A8
-set_io -nowarn pin_21 B7
-set_io -nowarn pin_22 A7
-set_io -nowarn pin_23 B6
-set_io -nowarn pin_24 A6
+set_io -nowarn spi_scl A8
+set_io -nowarn spi_sda B7
+set_io -nowarn spi_res A7
+set_io -nowarn spi_dc B6
+set_io -nowarn spi_cs A6
 
 # SPI flash interface on bottom of board
 set_io flash_csb F7

@@ -46,6 +46,13 @@ module hardware (
     inout sda,
     inout scl,
 `endif    
+`ifdef oled
+    inout spi_scl,
+    inout spi_sda,
+    inout spi_res,
+    inout spi_dc,
+    inout spi_cs,
+`endif
     // onboard LED
     output user_led
 
@@ -103,10 +110,12 @@ module hardware (
         .PACKAGE_PIN(buttons),
         .D_IN_0(gpio_buttons)
     );
+
 `ifdef audio
     reg [11:0] audio_out;
     pdm_dac dac(.clk(clk), .din(audio_out), .dout(audio));
 `endif
+
 `ifdef i2c
     reg i2c_enable = 0, i2c_read = 0;
     reg [31:0] i2c_write_reg = 0;
@@ -122,14 +131,33 @@ module hardware (
         .read(i2c_read),
         .status(i2c_read_reg));
 `endif
+
+`ifdef oled
+        reg [3:0] spi_wr;
+	reg [31:0] spi_rdata;
+	reg spi_ready;
+        spi_oled #(.CLOCK_FREQ_HZ(16000000)) oled (
+            .clk(clk),
+            .resetn(resetn),
+            .ctrl_wr(spi_wr),
+            .ctrl_rd(0),
+            .ctrl_addr(iomem_addr),
+            .ctrl_wdat(iomem_wdata),
+            .ctrl_rdat(spi_rdata),
+            .ctrl_done(spi_ready),
+            .mosi(spi_sda),
+            .sclk(spi_scl),
+            .cs(spi_cs),
+            .dc(spi_dc),
+            .rst(spi_res));
+`endif
+
     always @(posedge clk) begin
         if (!resetn) begin
             gpio <= 0;
         end else begin
             iomem_ready <= 0;
-`ifdef i2c
-            i2c_enable <= 0;
-`endif
+
             ///////////////////////////
             // GPIO Peripheral
             ///////////////////////////
@@ -149,6 +177,7 @@ module hardware (
             ///////////////////////////
             // Audio Peripheral
             ///////////////////////////
+
 `ifdef audio
             if (iomem_valid && !iomem_ready && iomem_addr[31:24] == 8'h04) begin
                 iomem_ready <= 1;
@@ -157,10 +186,26 @@ module hardware (
                 if (iomem_wstrb[1]) audio_out[11:8] <= iomem_wdata[11:8];
             end
 `endif
+
+            ///////////////////////////
+            // Video Peripheral
+            ///////////////////////////
+
+`ifdef oled
+            spi_wr <= 0;
+            if (iomem_valid && !iomem_ready && iomem_addr[31:24] == 8'h05) begin
+                 iomem_ready <= spi_ready;
+                 iomem_rdata <= spi_rdata;
+                if (|iomem_wstrb) spi_wr <= iomem_wstrb;
+            end
+`endif
+
             ///////////////////////////
             // Controller Peripheral
             ///////////////////////////
+
 `ifdef i2c
+            i2c_enable <= 0;
             if (iomem_valid && !iomem_ready && iomem_addr[31:24] == 8'h07) begin
                 iomem_ready <= 1;
                 if (iomem_wstrb[0]) i2c_write_reg[7:0] <= iomem_wdata[ 7: 0];

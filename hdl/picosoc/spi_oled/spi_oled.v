@@ -5,16 +5,16 @@ module spi_oled #(
 	input clk,
 	input resetn,
 
-	input ctrl_wr,
+	input [3:0] ctrl_wr,
 	input ctrl_rd,
-	input [ 7:0] ctrl_addr,
+	input [31:0] ctrl_addr,
 	input [31:0] ctrl_wdat,
 	output reg [31:0] ctrl_rdat,
 	output reg ctrl_done,
 
 	inout mosi, sclk, cs, dc, rst
 );
-	reg spi_mosi, spi_sclk, spi_cs, spi_ds, spi_rst;
+	reg spi_mosi, spi_sclk, spi_cs, spi_dc, spi_rst;
 
 	reg mode_cpol;
 	reg mode_cpha;
