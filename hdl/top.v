@@ -175,6 +175,26 @@ module hardware (
             .y_px(ypos), 
             .activevideo(video_active), 
             .px_clk(pixel_clock));
+    
+        wire [5:0] texture_idx;
+        map_rom map(
+            .clk(pixel_clock), 
+            .x_idx(xpos[8:3]), 
+            .y_idx(ypos[8:3]), 
+            .val(texture_idx));
+
+        reg [2:0] rom_rgb;
+        texture_rom texture(
+             .clk(pixel_clock), 
+             .texture_idx(texture_idx), 
+             .y_idx(ypos[2:0]), 
+             .x_idx(xpos[2:0]), 
+             .val(rom_rgb));
+
+        assign vga_red = video_active & rom_rgb[0];
+        assign vga_green = video_active & rom_rgb[1];
+        assign vga_blue= video_active & rom_rgb[2];
+
 `endif
 
     always @(posedge clk) begin
