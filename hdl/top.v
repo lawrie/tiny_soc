@@ -41,11 +41,13 @@ module hardware (
     // Audio out pin
     output audio,
 `endif
+
 `ifdef i2c
     // I2C pins
     inout sda,
     inout scl,
-`endif    
+`endif
+    
 `ifdef oled
     inout spi_scl,
     inout spi_sda,
@@ -53,6 +55,15 @@ module hardware (
     inout spi_dc,
     inout spi_cs,
 `endif
+
+`ifdef vga
+    output vga_vsync,
+    output vga_hsync,
+    output vga_red,
+    output vga_green,
+    output vga_blue,
+`endif
+
     // onboard LED
     output user_led
 
@@ -150,6 +161,20 @@ module hardware (
             .cs(spi_cs),
             .dc(spi_dc),
             .rst(spi_res));
+`endif
+
+`ifdef vga
+        reg [9:0] xpos, ypos;
+        wire video_active;
+        wire pixel_clock;
+        VGASyncGen vga_generator(
+            .clk(clk),
+            .hsync(vga_hsync), 
+            .vsync(vga_vsync), 
+            .x_px(xpos), 
+            .y_px(ypos), 
+            .activevideo(video_active), 
+            .px_clk(pixel_clock));
 `endif
 
     always @(posedge clk) begin
