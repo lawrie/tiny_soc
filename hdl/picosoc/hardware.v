@@ -38,7 +38,10 @@ module hardware (
     inout  flash_io0,
     inout  flash_io1,
     inout  flash_io2,
-    inout  flash_io3
+    inout  flash_io3,
+
+    // GPIO buttons
+    inout  [7:0] buttons
 );
     assign pin_pu = 1'b1;
     assign pin_usbp = 1'b0;
@@ -46,7 +49,6 @@ module hardware (
 
     wire clk = clk_16mhz;
   
-
     ///////////////////////////////////
     // Power-on Reset
     ///////////////////////////////////
@@ -56,7 +58,6 @@ module hardware (
     always @(posedge clk) begin
         reset_cnt <= reset_cnt + !resetn;
     end
-
   
     ///////////////////////////////////
     // SPI Flash Interface
@@ -75,8 +76,6 @@ module hardware (
         .D_OUT_0({flash_io3_do, flash_io2_do, flash_io1_do, flash_io0_do}),
         .D_IN_0({flash_io3_di, flash_io2_di, flash_io1_di, flash_io0_di})
     );
-
-    
   
     ///////////////////////////////////
     // Peripheral Bus
@@ -89,7 +88,16 @@ module hardware (
     reg  [31:0] iomem_rdata;
 
     reg [31:0] gpio;
+    wire [7:0]  gpio_buttons;
     assign user_led = gpio[0];
+
+    SB_IO #(
+        .PIN_TYPE(6'b 0000_01),
+        .PULLUP(1'b 1)
+    ) buttons_input [7:0] (
+        .PACKAGE_PIN(buttons),
+        .D_IN_0(gpio_buttons)
+    );
 
     always @(posedge clk) begin
         if (!resetn) begin
@@ -102,14 +110,17 @@ module hardware (
             ///////////////////////////
             if (iomem_valid && !iomem_ready && iomem_addr[31:24] == 8'h03) begin
                 iomem_ready <= 1;
-                iomem_rdata <= gpio;
-                if (iomem_wstrb[0]) gpio[ 7: 0] <= iomem_wdata[ 7: 0];
-                if (iomem_wstrb[1]) gpio[15: 8] <= iomem_wdata[15: 8];
-                if (iomem_wstrb[2]) gpio[23:16] <= iomem_wdata[23:16];
-                if (iomem_wstrb[3]) gpio[31:24] <= iomem_wdata[31:24];
+		if (iomem_addr[7:0] == 8'h00) begin
+	            iomem_rdata <= gpio;
+		    if (iomem_wstrb[0]) gpio[ 7: 0] <= iomem_wdata[ 7: 0];
+		    if (iomem_wstrb[1]) gpio[15: 8] <= iomem_wdata[15: 8];
+		    if (iomem_wstrb[2]) gpio[23:16] <= iomem_wdata[23:16];
+		    if (iomem_wstrb[3]) gpio[31:24] <= iomem_wdata[31:24];
+		end else if (iomem_addr[7:0] == 8'h04) begin
+		    iomem_rdata <= ~gpio_buttons;
+		end
             end
 
-            
             ///////////////////////////
             // Template Peripheral
             ///////////////////////////
