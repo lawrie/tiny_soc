@@ -12,3 +12,5 @@ hardware.rpt
 *.rpt
 *.blif
 *.map
+*.log
+*.elf
