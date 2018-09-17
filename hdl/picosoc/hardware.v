@@ -27,9 +27,6 @@ module hardware (
     output pin_1,
     input pin_2,
 
-    // onboard LED
-    output user_led,
-
     // onboard SPI flash interface
     output flash_csb,
     output flash_clk,
@@ -40,13 +37,18 @@ module hardware (
 
     // GPIO buttons
     inout  [7:0] buttons,
-
+`ifdef audio
     // Audio out pin
     output audio,
-
+`endif
+`ifdef i2c
     // I2C pins
     inout sda,
-    inout scl
+    inout scl,
+`endif    
+    // onboard LED
+    output user_led
+
 );
     assign pin_pu = 1'b0;
 
@@ -101,10 +103,11 @@ module hardware (
         .PACKAGE_PIN(buttons),
         .D_IN_0(gpio_buttons)
     );
-
+`ifdef audio
     reg [11:0] audio_out;
     pdm_dac dac(.clk(clk), .din(audio_out), .dout(audio));
-
+`endif
+`ifdef i2c
     reg i2c_enable = 0, i2c_read = 0;
     reg [31:0] i2c_write_reg = 0;
     reg [31:0] i2c_read_reg;
@@ -118,14 +121,15 @@ module hardware (
         .wr_ctrl(i2c_enable),
         .read(i2c_read),
         .status(i2c_read_reg));
-
+`endif
     always @(posedge clk) begin
         if (!resetn) begin
             gpio <= 0;
         end else begin
             iomem_ready <= 0;
+`ifdef i2c
             i2c_enable <= 0;
-
+`endif
             ///////////////////////////
             // GPIO Peripheral
             ///////////////////////////
@@ -145,18 +149,18 @@ module hardware (
             ///////////////////////////
             // Audio Peripheral
             ///////////////////////////
-
+`ifdef audio
             if (iomem_valid && !iomem_ready && iomem_addr[31:24] == 8'h04) begin
                 iomem_ready <= 1;
                 iomem_rdata <= 32'h0;
                 if (iomem_wstrb[0]) audio_out[7:0] <= iomem_wdata[7:0];
                 if (iomem_wstrb[1]) audio_out[11:8] <= iomem_wdata[11:8];
             end
-
+`endif
             ///////////////////////////
             // Controller Peripheral
             ///////////////////////////
-
+`ifdef i2c
             if (iomem_valid && !iomem_ready && iomem_addr[31:24] == 8'h07) begin
                 iomem_ready <= 1;
                 if (iomem_wstrb[0]) i2c_write_reg[7:0] <= iomem_wdata[ 7: 0];
@@ -171,6 +175,7 @@ module hardware (
                     i2c_read <= 1;
                 end
             end
+`endif
         end
     end
 

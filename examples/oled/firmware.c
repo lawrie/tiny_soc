@@ -10,7 +10,6 @@ extern uint32_t sram;
 #define reg_uart_data (*(volatile uint32_t*)0x02000008)
 #define reg_leds (*(volatile uint32_t*)0x03000000)
 #define reg_buttons (*(volatile uint32_t*)0x03000004)
-#define reg_audio (*(volatile uint32_t*)0x04000000)
 
 extern uint32_t _sidata, _sdata, _edata, _sbss, _ebss,_heap_start;
 
@@ -135,8 +134,6 @@ void main() {
     while (1) {
         reg_leds = led_timer >> 16;
         led_timer = led_timer + 1;
-
-	reg_audio = (reg_buttons & 1 && led_timer & 0x20 ? 0x7ff : 0);
 	if ((led_timer & 0xffff) == 0) {
             print("Buttons: ");
             print_hex(reg_buttons & 0xff, 8);

@@ -5,10 +5,6 @@
 
 // TODO everything
 
-
-`ifndef __GAME_SOC_VIDEO__
-`define __GAME_SOC_VIDEO__
-
 module video
 (
   input resetn,
@@ -42,5 +38,3 @@ module video
 	end
 
 endmodule
-
-`endif
