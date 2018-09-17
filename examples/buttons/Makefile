@@ -4,7 +4,7 @@ LDS_FILE = ../../hdl/picosoc/sections.lds
 START_FILE = ../../hdl/picosoc/start.S
 C_FILE = firmware.c
 
-include ../../hdl/picosoc/tinyfpga.mk
+include ../../hdl/tinyfpga.mk
 
 
 

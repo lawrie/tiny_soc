@@ -40,7 +40,13 @@ module hardware (
 
     // GPIO buttons
     inout  [7:0] buttons,
-    output audio
+
+    // Audio out pin
+    output audio,
+
+    // I2C pins
+    inout sda,
+    inout scl
 );
     assign pin_pu = 1'b0;
 
@@ -99,11 +105,26 @@ module hardware (
     reg [11:0] audio_out;
     pdm_dac dac(.clk(clk), .din(audio_out), .dout(audio));
 
+    reg i2c_enable = 0, i2c_read = 0;
+    reg [31:0] i2c_write_reg = 0;
+    reg [31:0] i2c_read_reg;
+
+    I2C_master #(.freq(16)) i2c (
+        .SDA(sda),
+        .SCL(scl),
+        .sys_clock(clk),
+        .reset(~resetn),
+        .ctrl_data(i2c_write_reg),
+        .wr_ctrl(i2c_enable),
+        .read(i2c_read),
+        .status(i2c_read_reg));
+
     always @(posedge clk) begin
         if (!resetn) begin
             gpio <= 0;
         end else begin
             iomem_ready <= 0;
+            i2c_enable <= 0;
 
             ///////////////////////////
             // GPIO Peripheral
@@ -139,9 +160,15 @@ module hardware (
             if (iomem_valid && !iomem_ready && iomem_addr[31:24] == 8'h07) begin
                 iomem_ready <= 1;
                 if (iomem_addr[7:0] == 8'h00) begin
+                    i2c_enable <= 1;
+                    i2c_read <= 0;
+                    if (iomem_wstrb[0]) i2c_write_reg[7:0] <= iomem_wdata[ 7: 0];
+                    if (iomem_wstrb[1]) i2c_write_reg[15: 8] <= iomem_wdata[15: 8];
+                    if (iomem_wstrb[2]) i2c_write_reg[23:16] <= iomem_wdata[23:16];
+                    if (iomem_wstrb[3]) i2c_write_reg[31:24] <= iomem_wdata[31:24];
                 end else if (iomem_addr[7:0] == 8'h04) begin
+                    iomem_rdata <= i2c_read_reg;
                 end
-                iomem_rdata <= 32'h0;
             end
         end
     end

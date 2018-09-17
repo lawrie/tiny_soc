@@ -29,12 +29,13 @@ Planned IO locations for the devices are:
 | 0x0200_0000 | SPI config |
 | 0x0200_0004 | UART divider |
 | 0x0200_0008 | UART data register |
-| 0x03xx_xxxx | On-board LED |
-| 0x03xx_xxxx | GPIO buttons |
+| 0x0300_0000 | On-board LED |
+| 0x0300_0004 | GPIO buttons |
 | 0x04xx_xxxx | Audio device |
 | 0x05xx_xxxx | Video device |
 | 0x06xx_xxxx | Timer/counter |
-| 0x07xx_xxxx | Game controller |
+| 0x0700_0000 | I2C write |
+| 0x0700_0004 | I2C read |
 
 
 Documentation for each of the peripherals, including more detailed register mappings will be placed in their respective folders under hdl/picosoc (as they are developed).

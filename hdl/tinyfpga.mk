@@ -2,7 +2,7 @@ upload: hardware.bin firmware.bin
 	tinyprog -p hardware.bin -u firmware.bin
 
 hardware.blif: $(VERILOG_FILES) 
-	yosys -ql hardware.log -p 'synth_ice40 -top hardware -blif hardware.blif' $^
+	yosys -f "verilog $(DEFINES)" -ql hardware.log -p 'synth_ice40 -top hardware -blif hardware.blif' $^
 
 hardware.asc: $(PCF_FILE) hardware.blif
 	arachne-pnr -d 8k -P cm81 -o hardware.asc -p $(PCF_FILE) hardware.blif
