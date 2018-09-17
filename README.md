@@ -7,6 +7,7 @@ The PicoRV CPU variant chosen will be, by necessity, very cut-down in functional
 The planned peripherals are:
 
 * On-board LED
+* GPIO inputs (buttons, switches)
 * Serial UART
 * [planned] an IRQ-based timer/counter
 * [planned] a 3-channel audio synthesizer
@@ -15,7 +16,7 @@ The planned peripherals are:
  * palette of 16 colours from ~262k
  * tile/map based support
  * sprites
-* [planned] joystick port(s)
+* [planned] game controller (e.g. Wii Nunchuk)
 
 Planned IO locations for the devices are:
 
@@ -29,9 +30,11 @@ Planned IO locations for the devices are:
 | 0x0200_0004 | UART divider |
 | 0x0200_0008 | UART data register |
 | 0x03xx_xxxx | On-board LED |
+| 0x03xx_xxxx | GPIO buttons |
 | 0x04xx_xxxx | Audio device |
 | 0x05xx_xxxx | Video device |
 | 0x06xx_xxxx | Timer/counter |
+| 0x07xx_xxxx | Game controller |
 
 
 Documentation for each of the peripherals, including more detailed register mappings will be placed in their respective folders under hdl/picosoc (as they are developed).
