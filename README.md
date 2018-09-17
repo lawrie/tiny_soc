@@ -12,11 +12,11 @@ The planned peripherals are:
 * [planned] an IRQ-based timer/counter
 * [planned] a 3-channel audio synthesizer
 * [planned] Graphics output
- * 320x240 resolution
+ * 320x240 resolution LCD or 128x128 OLED
  * palette of 16 colours from ~262k
  * tile/map based support
  * sprites
-* [planned] game controller (e.g. Wii Nunchuk)
+* Game controller (currently Wii Nunchuk)
 
 Planned IO locations for the devices are:
 
@@ -31,7 +31,7 @@ Planned IO locations for the devices are:
 | 0x0200_0008 | UART data register |
 | 0x0300_0000 | On-board LED |
 | 0x0300_0004 | GPIO buttons |
-| 0x04xx_xxxx | Audio device |
+| 0x0400_0000 | Audio device |
 | 0x05xx_xxxx | Video device |
 | 0x06xx_xxxx | Timer/counter |
 | 0x0700_0000 | I2C write |
