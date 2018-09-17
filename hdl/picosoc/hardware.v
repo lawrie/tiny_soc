@@ -159,15 +159,16 @@ module hardware (
 
             if (iomem_valid && !iomem_ready && iomem_addr[31:24] == 8'h07) begin
                 iomem_ready <= 1;
+                if (iomem_wstrb[0]) i2c_write_reg[7:0] <= iomem_wdata[ 7: 0];
+                if (iomem_wstrb[1]) i2c_write_reg[15: 8] <= iomem_wdata[15: 8];
+                if (iomem_wstrb[2]) i2c_write_reg[23:16] <= iomem_wdata[23:16];
+                if (iomem_wstrb[3]) i2c_write_reg[31:24] <= iomem_wdata[31:24];
+                iomem_rdata <= i2c_read_reg;
+                if (|iomem_wstrb) i2c_enable <= 1;
                 if (iomem_addr[7:0] == 8'h00) begin
-                    i2c_enable <= 1;
                     i2c_read <= 0;
-                    if (iomem_wstrb[0]) i2c_write_reg[7:0] <= iomem_wdata[ 7: 0];
-                    if (iomem_wstrb[1]) i2c_write_reg[15: 8] <= iomem_wdata[15: 8];
-                    if (iomem_wstrb[2]) i2c_write_reg[23:16] <= iomem_wdata[23:16];
-                    if (iomem_wstrb[3]) i2c_write_reg[31:24] <= iomem_wdata[31:24];
                 end else if (iomem_addr[7:0] == 8'h04) begin
-                    iomem_rdata <= i2c_read_reg;
+                    i2c_read <= 1;
                 end
             end
         end

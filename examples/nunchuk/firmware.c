@@ -132,7 +132,7 @@ void main() {
 
 
     // Initialize the Nunchuk
-    reg_i2c_write = 0xd24000;
+    reg_i2c_write = 0xd2400000;
 
     // blink the user LED
     uint32_t led_timer = 0;
@@ -141,8 +141,10 @@ void main() {
         reg_leds = led_timer >> 16;
         led_timer = led_timer + 1;
 
-        if ((led_timer & 0xffff) == 0x7fff) {
+        if ((led_timer & 0xffff) == 0x3fff) {
           reg_i2c_write = 0xd2000000; // Request data
+        } else if ((led_timer & 0xffff) == 0x7fff) {
+          reg_i2c_read = 0x00a40001; // Request data
         } else if ((led_timer & 0xffff) == 0) {
             print("Buttons: ");
             print_hex(reg_buttons & 0xff, 8);
