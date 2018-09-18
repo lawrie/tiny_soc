@@ -3,7 +3,7 @@ PCF_FILE = ../../hdl/hardware.pcf
 LDS_FILE = ../../hdl/picosoc/sections.lds
 START_FILE = ../../hdl/picosoc/start.S
 C_FILE = firmware.c
-DEFINES = -Daudio -Di2c
+DEFINES = -Di2c
 
 include ../../hdl/tinyfpga.mk
 

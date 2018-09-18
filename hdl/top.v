@@ -17,11 +17,8 @@
  *
  */
 
-module hardware (
-    input clk_16mhz,
-
-    // onboard USB interface
-    output pin_pu,
+module top (
+    input clk,
 
     // hardware UART
     output pin_1,
@@ -35,8 +32,6 @@ module hardware (
     inout  flash_io2,
     inout  flash_io3,
 
-    // GPIO buttons
-    inout  [7:0] buttons,
 `ifdef audio
     // Audio out pin
     output audio,
@@ -64,14 +59,19 @@ module hardware (
     output vga_blue,
 `endif
 
-    // onboard LED
-    output user_led
+`ifdef gpio
+    // GPIO buttons
+    inout  [7:0] buttons,
 
+    // onboard LED
+    output user_led,
+`endif
+    
+    // onboard USB interface
+    output pin_pu
 );
     assign pin_pu = 1'b0;
 
-    wire clk = clk_16mhz;
-  
     ///////////////////////////////////
     // Power-on Reset
     ///////////////////////////////////
@@ -110,6 +110,7 @@ module hardware (
     wire [31:0] iomem_wdata;
     reg  [31:0] iomem_rdata;
 
+`ifdef gpio
     reg [31:0] gpio;
     wire [7:0]  gpio_buttons;
     assign user_led = gpio[0];
@@ -121,6 +122,7 @@ module hardware (
         .PACKAGE_PIN(buttons),
         .D_IN_0(gpio_buttons)
     );
+`endif
 
 `ifdef audio
     reg [11:0] audio_out;
@@ -191,18 +193,31 @@ module hardware (
              .x_idx(xpos[2:0]), 
              .val(rom_rgb));
 
-        assign vga_red = video_active & rom_rgb[0];
-        assign vga_green = video_active & rom_rgb[1];
-        assign vga_blue= video_active & rom_rgb[2];
+        reg[2:0] sprite_rgb;
+        reg [9:0] sprite_x = 20, sprite_y = 30;
+        sprite_rom sprite(
+            .clk(pixel_clock), 
+            .y_idx(ypos[4:0] - sprite_y[4:0]), 
+            .x_idx(xpos[4:0] - sprite_x[4:0]), 
+            .rgb(sprite_rgb));
 
+        wire on_sprite = (xpos >= sprite_x && xpos < sprite_x + 32 &&
+                          ypos >= sprite_y && ypos < sprite_y + 32);
+ 
+        assign vga_red = video_active & (on_sprite ? sprite_rgb[2] :rom_rgb[0]);
+        assign vga_green = video_active & (on_sprite ? sprite_rgb[1] :rom_rgb[1]);
+        assign vga_blue= video_active & (on_sprite ? sprite_rgb[0] : rom_rgb[2]);
 `endif
 
     always @(posedge clk) begin
         if (!resetn) begin
+`ifdef gpio
             gpio <= 0;
+`endif
         end else begin
             iomem_ready <= 0;
 
+`ifdef gpio
             ///////////////////////////
             // GPIO Peripheral
             ///////////////////////////
@@ -222,6 +237,7 @@ module hardware (
             ///////////////////////////
             // Audio Peripheral
             ///////////////////////////
+`endif
 
 `ifdef audio
             if (iomem_valid && !iomem_ready && iomem_addr[31:24] == 8'h04) begin

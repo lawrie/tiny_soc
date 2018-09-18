@@ -3,6 +3,7 @@ PCF_FILE = ../../hdl/hardware.pcf
 LDS_FILE = ../../hdl/picosoc/sections.lds
 START_FILE = ../../hdl/picosoc/start.S
 C_FILE = firmware.c
+DEFINES = -Dgpio
 
 include ../../hdl/tinyfpga.mk
 

@@ -138,7 +138,7 @@ void main() {
     uint32_t led_timer = 0;
        
     while (1) {
-        reg_leds = led_timer >> 16;
+        //reg_leds = led_timer >> 16;
         led_timer = led_timer + 1;
 
         if ((led_timer & 0xffff) == 0x3fff) {
@@ -146,10 +146,6 @@ void main() {
         } else if ((led_timer & 0xffff) == 0x7fff) {
           reg_i2c_read = 0x00a40001; // Request data
         } else if ((led_timer & 0xffff) == 0) {
-            print("Buttons: ");
-            print_hex(reg_buttons & 0xff, 8);
-            print("\n");
-
             print("i2c status: ");
             print_hex(reg_i2c_read, 8);
             print("\n");

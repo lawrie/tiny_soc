@@ -9,7 +9,9 @@ extern uint32_t sram;
 #define reg_uart_clkdiv (*(volatile uint32_t*)0x02000004)
 #define reg_uart_data (*(volatile uint32_t*)0x02000008)
 #define reg_leds (*(volatile uint32_t*)0x03000000)
-
+#define reg_buttons (*(volatile uint32_t*)0x03000004)
+#define reg_i2c_write (*(volatile uint32_t*)0x07000000)
+#define reg_i2c_read (*(volatile uint32_t*)0x07000004)
 extern uint32_t _sidata, _sdata, _edata, _sbss, _ebss,_heap_start;
 
 uint32_t set_irq_mask(uint32_t mask); asm (
@@ -131,7 +133,16 @@ void main() {
     uint32_t led_timer = 0;
        
     while (1) {
-        reg_leds = led_timer >> 16;
         led_timer = led_timer + 1;
+
+        if ((led_timer & 0xffff) == 0x3fff) {
+          reg_i2c_write = 0xd2000000; // Request data
+        } else if ((led_timer & 0xffff) == 0x7fff) {
+          reg_i2c_read = 0x00a40001; // Request data
+        } else if ((led_timer & 0xffff) == 0) {
+            print("i2c status: ");
+            print_hex(reg_i2c_read, 8);
+            print("\n");
+        }    
     } 
 }
