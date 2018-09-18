@@ -7,7 +7,3 @@ DEFINES = -Dvga -Di2c
 
 include ../../hdl/tiny_soc.mk
 
-
-
-
-

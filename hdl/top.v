@@ -70,6 +70,7 @@ module top (
     // onboard USB interface
     output pin_pu
 );
+    // Disable USB
     assign pin_pu = 1'b0;
 
     ///////////////////////////////////
@@ -204,7 +205,7 @@ module top (
         wire on_sprite = (xpos >= sprite_x && xpos < sprite_x + 32 &&
                           ypos >= sprite_y && ypos < sprite_y + 32);
  
-        assign vga_red = video_active & (on_sprite ? sprite_rgb[2] :rom_rgb[0]);
+        assign vga_red = video_active & (on_sprite ? sprite_rgb[2] : rom_rgb[0]);
         assign vga_green = video_active & (on_sprite ? sprite_rgb[1] :rom_rgb[1]);
         assign vga_blue= video_active & (on_sprite ? sprite_rgb[0] : rom_rgb[2]);
 `endif
@@ -233,13 +234,13 @@ module top (
 		    iomem_rdata <= ~gpio_buttons;
 		end
             end
-
-            ///////////////////////////
-            // Audio Peripheral
-            ///////////////////////////
 `endif
 
 `ifdef audio
+            ///////////////////////////
+            // Audio Peripheral
+            ///////////////////////////
+
             if (iomem_valid && !iomem_ready && iomem_addr[31:24] == 8'h04) begin
                 iomem_ready <= 1;
                 iomem_rdata <= 32'h0;
@@ -261,6 +262,16 @@ module top (
             end
 `endif
 
+`ifdef vga
+            if (iomem_valid && !iomem_ready && iomem_addr[31:24] == 8'h05) begin
+                 iomem_ready <= 1;
+                 iomem_rdata <= 0;
+                 if (&iomem_wstrb)  begin
+                    sprite_x <= iomem_wdata[9:0];
+                    sprite_y <= iomem_wdata[25:16];
+                 end
+            end
+`endif
             ///////////////////////////
             // Controller Peripheral
             ///////////////////////////
