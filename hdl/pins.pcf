@@ -58,11 +58,11 @@ set_io -nowarn spi_dc D9
 set_io -nowarn spi_res D8
 set_io -nowarn spi_sda C9
 set_io -nowarn spi_scl A9
-set_io -nowarn vga_vsync B8
-set_io -nowarn vga_hsync A8
-set_io -nowarn vga_red B7
-set_io -nowarn vga_green A7
-set_io -nowarn vga_blue B6
+set_io -nowarn vga_vsync H2
+set_io -nowarn vga_hsync J1
+set_io -nowarn vga_red H1
+set_io -nowarn vga_green G2
+set_io -nowarn vga_blue E1
 set_io -nowarn pin_24 A6
 
 # SPI flash interface on bottom of board
