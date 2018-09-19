@@ -40,7 +40,7 @@
 set_io -nowarn TX A2
 set_io -nowarn RX A1
 
-set_io -nowarn audioI-left B1
+set_io -nowarn audio_left B1
 set_io -nowarn audio_right C1
 
 set_io -nowarn sda C2
