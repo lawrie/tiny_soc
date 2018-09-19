@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "nunchuk.h"
+#include "uart.h"
 
 // a pointer to this is a null pointer, but the compiler does not
 // know that because "sram" is a linker symbol from sections.lds.
@@ -9,8 +10,6 @@ extern uint32_t sram;
 #define reg_spictrl (*(volatile uint32_t*)0x02000000)
 #define reg_uart_clkdiv (*(volatile uint32_t*)0x02000004)
 #define reg_uart_data (*(volatile uint32_t*)0x02000008)
-#define reg_leds (*(volatile uint32_t*)0x03000000)
-#define reg_buttons (*(volatile uint32_t*)0x03000004)
 
 extern uint32_t _sidata, _sdata, _edata, _sbss, _ebss,_heap_start;
 
@@ -21,38 +20,9 @@ uint32_t set_irq_mask(uint32_t mask); asm (
     "ret\n"
 );
 
-// --------------------------------------------------------
-
-void putchar(char c)
-{
-	if (c == '\n')
-		putchar('\r');
-	reg_uart_data = c;
-}
-
-void print(const char *p)
-{
-	while (*p)
-		putchar(*(p++));
-}
-
-void print_hex(uint32_t v, int digits)
-{
-	for (int i = 7; i >= 0; i--) {
-		char c = "0123456789abcdef"[(v >> (4*i)) & 15];
-		if (c == '0' && i >= digits) continue;
-		putchar(c);
-		digits = i;
-	}
-}
-
 void delay(uint32_t n) {
   for (uint32_t i = 0; i < n; i++) asm volatile ("");
 }
-
-
-// --------------------------------------------------------
-
 
 void main() {
     reg_uart_clkdiv = 139;
@@ -67,14 +37,6 @@ void main() {
     // switch to dual IO mode
     reg_spictrl = (reg_spictrl & ~0x007F0000) | 0x00400000;
  
-    print("\n");
-    print("  ____  _          ____         ____\n");
-    print(" |  _ \\(_) ___ ___/ ___|  ___  / ___|\n");
-    print(" | |_) | |/ __/ _ \\___ \\ / _ \\| |\n");
-    print(" |  __/| | (_| (_) |__) | (_) | |___\n");
-    print(" |_|   |_|\\___\\___/____/ \\___/ \\____|\n");
-
-
     // Initialize the Nunchuk
     i2c_send_cmd(0x40, 0x00);
 
@@ -85,7 +47,7 @@ void main() {
 
         if ((timer & 0xffff) == 0xffff) {
           i2c_send_cmd(0x00, 0x00);
-          delay(1000);
+          delay(100);
           uint8_t jx = i2c_read();
           print("Joystick x: ");
           print_hex(jx, 2);

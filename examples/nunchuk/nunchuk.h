@@ -32,7 +32,7 @@ uint8_t i2c_read() {
   uint32_t status;
 
   reg_i2c_read = (ADDRESS << 17) | 1;
-  for (uint32_t i = 0; i < 10000; i++) asm volatile ("");
+  for (uint32_t i = 0; i < 100; i++) asm volatile ("");
 	
   do {
     status = i2c_get_status();

@@ -2,7 +2,7 @@ VERILOG_FILES = ../../hdl/top.v ../../hdl/picosoc/memory/spimemio.v ../../hdl/pi
 PCF_FILE = ../../hdl/pins.pcf
 LDS_FILE = ../../firmware/sections.lds
 START_FILE = ../../firmware/start.S
-C_FILE = main.c
+C_FILE = main.c uart.c
 DEFINES = -Di2c
 
 include ../../hdl/tiny_soc.mk
