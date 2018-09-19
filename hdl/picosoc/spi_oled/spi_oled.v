@@ -5,9 +5,9 @@ module spi_oled #(
 	input clk,
 	input resetn,
 
-	input [3:0] ctrl_wr,
+	input ctrl_wr,
 	input ctrl_rd,
-	input [31:0] ctrl_addr,
+	input [7:0] ctrl_addr,
 	input [31:0] ctrl_wdat,
 	output reg [31:0] ctrl_rdat,
 	output reg ctrl_done,

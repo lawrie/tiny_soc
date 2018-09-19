@@ -34,7 +34,6 @@ This is a cut down version of the Adafruit GFX library for BlackSoC.
 
 */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include "font.h"
