@@ -21,8 +21,8 @@ module top (
     input clk,
 
     // hardware UART
-    output pin_1,
-    input pin_2,
+    output TX,
+    input RX,
 
     // onboard SPI flash interface
     output flash_csb,
@@ -34,7 +34,7 @@ module top (
 
 `ifdef audio
     // Audio out pin
-    output audio,
+    output audio_left,
 `endif
 
 `ifdef i2c
@@ -127,7 +127,7 @@ module top (
 
 `ifdef audio
     reg [11:0] audio_out;
-    pdm_dac dac(.clk(clk), .din(audio_out), .dout(audio));
+    pdm_dac dac(.clk(clk), .din(audio_out), .dout(audio_left));
 `endif
 
 `ifdef i2c
@@ -306,8 +306,8 @@ module top (
         .clk          (clk         ),
         .resetn       (resetn      ),
 
-        .ser_tx       (pin_1       ),
-        .ser_rx       (pin_2       ),
+        .ser_tx       (TX       ),
+        .ser_rx       (RX       ),
 
         .flash_csb    (flash_csb   ),
         .flash_clk    (flash_clk   ),

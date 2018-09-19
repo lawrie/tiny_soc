@@ -37,20 +37,23 @@
 # TinyFPGA BX information: https://github.com/tinyfpga/TinyFPGA-BX/
 ####
 
-# Left side of board
-set_io -nowarn pin_1 A2
-set_io -nowarn pin_2 A1
-set_io -nowarn audio B1
+set_io -nowarn TX A2
+set_io -nowarn RX A1
+
+set_io -nowarn audioI-left B1
+set_io -nowarn audio_right C1
+
 set_io -nowarn sda C2
 set_io -nowarn scl C1
+
 set_io -nowarn buttons[7] D2
 set_io -nowarn buttons[6] D1
 set_io -nowarn buttons[5] E2
-set_io -nowarn buttons[4] E1
-set_io -nowarn buttons[3] G2
-set_io -nowarn buttons[2] H1
-set_io -nowarn buttons[1] J1
-set_io -nowarn buttons[0] H2
+set_io -nowarn buttons[4] A6
+set_io -nowarn buttons[3] B6
+set_io -nowarn buttons[2] A7
+set_io -nowarn buttons[1] B7
+set_io -nowarn buttons[0] A8
 
 # Right side of board
 set_io -nowarn spi_cs H9
