@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdbool.h>
+#include "nunchuk.h"
 
 // a pointer to this is a null pointer, but the compiler does not
 // know that because "sram" is a linker symbol from sections.lds.
@@ -10,8 +11,6 @@ extern uint32_t sram;
 #define reg_uart_data (*(volatile uint32_t*)0x02000008)
 #define reg_leds (*(volatile uint32_t*)0x03000000)
 #define reg_buttons (*(volatile uint32_t*)0x03000004)
-#define reg_i2c_write (*(volatile uint32_t*)0x07000000)
-#define reg_i2c_read (*(volatile uint32_t*)0x07000004)
 
 extern uint32_t _sidata, _sdata, _edata, _sbss, _ebss,_heap_start;
 
@@ -47,65 +46,10 @@ void print_hex(uint32_t v, int digits)
 	}
 }
 
-void print_dec(uint32_t v)
-{
-	if (v >= 100) {
-		print(">=100");
-		return;
-	}
-
-	if      (v >= 90) { putchar('9'); v -= 90; }
-	else if (v >= 80) { putchar('8'); v -= 80; }
-	else if (v >= 70) { putchar('7'); v -= 70; }
-	else if (v >= 60) { putchar('6'); v -= 60; }
-	else if (v >= 50) { putchar('5'); v -= 50; }
-	else if (v >= 40) { putchar('4'); v -= 40; }
-	else if (v >= 30) { putchar('3'); v -= 30; }
-	else if (v >= 20) { putchar('2'); v -= 20; }
-	else if (v >= 10) { putchar('1'); v -= 10; }
-
-	if      (v >= 9) { putchar('9'); v -= 9; }
-	else if (v >= 8) { putchar('8'); v -= 8; }
-	else if (v >= 7) { putchar('7'); v -= 7; }
-	else if (v >= 6) { putchar('6'); v -= 6; }
-	else if (v >= 5) { putchar('5'); v -= 5; }
-	else if (v >= 4) { putchar('4'); v -= 4; }
-	else if (v >= 3) { putchar('3'); v -= 3; }
-	else if (v >= 2) { putchar('2'); v -= 2; }
-	else if (v >= 1) { putchar('1'); v -= 1; }
-	else putchar('0');
+void delay(uint32_t n) {
+  for (uint32_t i = 0; i < n; i++) asm volatile ("");
 }
 
-char getchar_prompt(char *prompt)
-{
-	int32_t c = -1;
-
-	uint32_t cycles_begin, cycles_now, cycles;
-	__asm__ volatile ("rdcycle %0" : "=r"(cycles_begin));
-
-	if (prompt)
-		print(prompt);
-
-	reg_leds = ~0;
-	while (c == -1) {
-		__asm__ volatile ("rdcycle %0" : "=r"(cycles_now));
-		cycles = cycles_now - cycles_begin;
-		if (cycles > 12000000) {
-			if (prompt)
-				print(prompt);
-			cycles_begin = cycles_now;
-			reg_leds = ~reg_leds;
-		}
-		c = reg_uart_data;
-	}
-	reg_leds = 0;
-	return c;
-}
-
-char getchar()
-{
-	return getchar_prompt(0);
-}
 
 // --------------------------------------------------------
 
@@ -132,23 +76,40 @@ void main() {
 
 
     // Initialize the Nunchuk
-    reg_i2c_write = 0xd2400000;
+    i2c_send_cmd(0x40, 0x00);
 
-    // blink the user LED
-    uint32_t led_timer = 0;
+    uint32_t timer = 0;
        
     while (1) {
-        //reg_leds = led_timer >> 16;
-        led_timer = led_timer + 1;
+        timer = timer + 1;
 
-        if ((led_timer & 0xffff) == 0x3fff) {
-          reg_i2c_write = 0xd2000000; // Request data
-        } else if ((led_timer & 0xffff) == 0x7fff) {
-          reg_i2c_read = 0x00a40001; // Request data
-        } else if ((led_timer & 0xffff) == 0) {
-            print("i2c status: ");
-            print_hex(reg_i2c_read, 8);
-            print("\n");
-        }
+        if ((timer & 0xffff) == 0xffff) {
+          i2c_send_cmd(0x00, 0x00);
+          delay(1000);
+          uint8_t jx = i2c_read();
+          print("Joystick x: ");
+          print_hex(jx, 2);
+          print("\n");
+          uint8_t jy = i2c_read();
+          print("Joystick y: ");
+          print_hex(jy, 2);
+          print("\n");
+          uint8_t ax = i2c_read();
+          print("Acceleration x: ");
+          print_hex(ax, 2);
+          print("\n");
+          uint8_t ay = i2c_read();
+          print("Acceleration y: ");
+          print_hex(ay, 2);
+          print("\n");
+          uint8_t az = i2c_read();
+          print("Acceleration z: ");
+          print_hex(az, 2);
+          print("\n");
+          uint8_t rest = i2c_read();
+          print("Buttons: ");
+          print_hex(rest & 3, 2);
+          print("\n");
+        } 
     } 
 }
