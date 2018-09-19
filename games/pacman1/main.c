@@ -1,5 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
+#include <uart.h>
+#include "nunchuk.h"
 
 // a pointer to this is a null pointer, but the compiler does not
 // know that because "sram" is a linker symbol from sections.lds.
@@ -101,102 +103,18 @@ void init_cells() {
     for(int i=0;i<31;i++) for(int j=0;j<31;j++) cell[i][j] = init_cell[i][j];
 }	
 
-// --------------------------------------------------------
-
-void putchar(char c)
-{
-	if (c == '\n')
-		putchar('\r');
-	reg_uart_data = c;
-}
-
-void print(const char *p)
-{
-	while (*p)
-		putchar(*(p++));
-}
-
-void print_hex(uint32_t v, int digits)
-{
-	for (int i = 7; i >= 0; i--) {
-		char c = "0123456789abcdef"[(v >> (4*i)) & 15];
-		if (c == '0' && i >= digits) continue;
-		putchar(c);
-		digits = i;
-	}
-}
-
-void print_dec(uint32_t v)
-{
-	if (v >= 100) {
-		print(">=100");
-		return;
-	}
-
-	if      (v >= 90) { putchar('9'); v -= 90; }
-	else if (v >= 80) { putchar('8'); v -= 80; }
-	else if (v >= 70) { putchar('7'); v -= 70; }
-	else if (v >= 60) { putchar('6'); v -= 60; }
-	else if (v >= 50) { putchar('5'); v -= 50; }
-	else if (v >= 40) { putchar('4'); v -= 40; }
-	else if (v >= 30) { putchar('3'); v -= 30; }
-	else if (v >= 20) { putchar('2'); v -= 20; }
-	else if (v >= 10) { putchar('1'); v -= 10; }
-
-	if      (v >= 9) { putchar('9'); v -= 9; }
-	else if (v >= 8) { putchar('8'); v -= 8; }
-	else if (v >= 7) { putchar('7'); v -= 7; }
-	else if (v >= 6) { putchar('6'); v -= 6; }
-	else if (v >= 5) { putchar('5'); v -= 5; }
-	else if (v >= 4) { putchar('4'); v -= 4; }
-	else if (v >= 3) { putchar('3'); v -= 3; }
-	else if (v >= 2) { putchar('2'); v -= 2; }
-	else if (v >= 1) { putchar('1'); v -= 1; }
-	else putchar('0');
-}
-
-char getchar_prompt(char *prompt)
-{
-	int32_t c = -1;
-
-	uint32_t cycles_begin, cycles_now, cycles;
-	__asm__ volatile ("rdcycle %0" : "=r"(cycles_begin));
-
-	if (prompt)
-		print(prompt);
-
-	reg_leds = ~0;
-	while (c == -1) {
-		__asm__ volatile ("rdcycle %0" : "=r"(cycles_now));
-		cycles = cycles_now - cycles_begin;
-		if (cycles > 12000000) {
-			if (prompt)
-				print(prompt);
-			cycles_begin = cycles_now;
-			reg_leds = ~reg_leds;
-		}
-		c = reg_uart_data;
-	}
-	reg_leds = 0;
-	return c;
-}
-
-char getchar()
-{
-	return getchar_prompt(0);
-}
-
-// --------------------------------------------------------
-
-
 void print_cells() {
     for(int i=0;i<30;i++ ) {
       print("Cell [0][");
-      print_dec(i);
+      print_hex(i,2);
       print("] = ");
       print_hex(cell[0][i], 2);
       print("\n");
     }
+}
+
+void delay(uint32_t n) {
+  for (uint32_t i = 0; i < n; i++) asm volatile ("");
 }
 
 void main() {
@@ -211,14 +129,10 @@ void main() {
 
     // switch to dual IO mode
     reg_spictrl = (reg_spictrl & ~0x007F0000) | 0x00400000;
- 
-    print("\n");
-    print("  ____  _          ____         ____\n");
-    print(" |  _ \\(_) ___ ___/ ___|  ___  / ___|\n");
-    print(" | |_) | |/ __/ _ \\___ \\ / _ \\| |\n");
-    print(" |  __/| | (_| (_) |__) | (_) | |___\n");
-    print(" |_|   |_|\\___\\___/____/ \\___/ \\____|\n");
 
+    // Initialize the Nunchuk
+    i2c_send_cmd(0x40, 0x00);
+ 
     uint32_t timer = 0;
     uint16_t sprite_x = 0, sprite_y = 0;
 
@@ -227,22 +141,30 @@ void main() {
     while(1) {
         timer = timer + 1;
 
-        if ((timer & 0xffff) == 0x3fff) {
-          reg_i2c_write = 0xd2000000; // Request data
-        } else if ((timer & 0xffff) == 0x7fff) {
-          reg_i2c_read = 0x00a40001; // Request data
-        } else if ((timer & 0xffff) == 0) {
-            sprite_x = (sprite_x + 10) % 640;
-            sprite_y = (sprite_y + 10) % 480;
+         if ((timer & 0xfff) == 0xfff) {
+	    i2c_send_cmd(0x00, 0x00);
+            delay(100);
+            uint8_t jx = i2c_read();
+            print("Joystick x: ");
+            print_hex(jx, 2);
+            print("\n");
+            uint8_t jy = i2c_read();
+            print("Joystick y: ");
+            print_hex(jy, 2);
+            print("\n");
+            uint8_t prop = cell[sprite_y][sprite_x];
+            if (jx > 0xc0 && (prop & CAN_GO_RIGHT)) sprite_x = (sprite_x + 1) % 31;
+            if (jx < 0x40 && (prop & CAN_GO_LEFT) ) sprite_x = (sprite_x - 1) % 31;
+            if (jy < 0x40 && (prop & CAN_GO_DOWN)) sprite_y = (sprite_y + 1) % 29;
+            if (jy > 0xc0 && (prop & CAN_GO_UP)) sprite_y = (sprite_y - 1) % 29;
             print("Sprite x is ");
             print_hex(sprite_x, 8);
             print(", Sprite y is ");
             print_hex(sprite_y, 8);
+            print(" , prop = ");
+            print_hex(prop,2);
             print("\n"); 
-            reg_sprite = (sprite_y << 16) + sprite_x;
-            print("i2c status: ");
-            print_hex(reg_i2c_read, 8);
-            print("\n");
+            reg_sprite = (sprite_y << 20) + (sprite_x << 4);
         }    
     } 
 }
