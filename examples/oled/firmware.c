@@ -132,12 +132,10 @@ void main() {
     uint32_t led_timer = 0;
        
     while (1) {
-        reg_leds = led_timer >> 16;
+        //reg_leds = led_timer >> 16;
         led_timer = led_timer + 1;
 	if ((led_timer & 0xffff) == 0) {
-            print("Buttons: ");
-            print_hex(reg_buttons & 0xff, 8);
-            print("\n");
+            print("Oled display\n");
         }
     } 
 }
