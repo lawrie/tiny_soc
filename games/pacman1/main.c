@@ -154,9 +154,9 @@ void main() {
             print("\n");
             uint8_t prop = cell[sprite_y][sprite_x];
             if (jx > 0xc0 && (prop & CAN_GO_RIGHT)) sprite_x = (sprite_x + 1) % 31;
-            if (jx < 0x40 && (prop & CAN_GO_LEFT) ) sprite_x = (sprite_x - 1) % 31;
-            if (jy < 0x40 && (prop & CAN_GO_DOWN)) sprite_y = (sprite_y + 1) % 29;
-            if (jy > 0xc0 && (prop & CAN_GO_UP)) sprite_y = (sprite_y - 1) % 29;
+            else if (jx < 0x40 && (prop & CAN_GO_LEFT) ) sprite_x = (sprite_x - 1) % 31;
+            else if (jy < 0x40 && (prop & CAN_GO_DOWN)) sprite_y = (sprite_y + 1) % 29;
+            else if (jy > 0xc0 && (prop & CAN_GO_UP)) sprite_y = (sprite_y - 1) % 29;
             print("Sprite x is ");
             print_hex(sprite_x, 8);
             print(", Sprite y is ");
