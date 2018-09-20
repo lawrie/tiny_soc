@@ -7,178 +7,169 @@
 
 
 #include "custom_ops.S"
-.section .data
-
-.balign 4
-irq_handler_addr:
-	.word 0x0000000000000000
-soft_q2:
-	.word 0x0000000000000000
-soft_q3:
-	.word 0x0000000000000000
-soft_q0:
-	.word 0
-soft_q1:
-	.word 0
-
-
-
-
 
 .section .text
+.global init
 
 reset_vec:
+	picorv32_maskirq_insn(zero, zero)
 	// no more than 8 bytes here !
 	j start
 
-.global debug
 
 .balign 16
 irq_vec:
 
-	/* save registers */
-	//picorv32_setq_insn(q2, x1)
-	//picorv32_setq_insn(q3, x2)
-	sw x1, 4(zero)
-	sw x2, 8(zero) 
-
-
-	picorv32_getq_insn(x1, q0)
-	sw x1, 12(zero)
-	picorv32_getq_insn(x1, q1)
-	sw x1, 16(zero)
-
-
-
-
+	picorv32_setq_insn(q2, x1)  // q2 = ra
+	picorv32_setq_insn(q3, sp)  // q3 = stack pointer
 
 	// x2 is the stack pointer
-	lui x2, %hi(4096 - 4*32)
-	addi x2, x2, %lo(4096 - 4*32)
+	// stack normally is consumed from top downwards, but
+	// irq handler uses stack right at bottom of stack range
+	// (leaving top of stack for normal programs)..
+
+	addi sp, zero, 0
+
+//	lui sp, %hi(0)
+//	addi sp, sp, %lo(0)
 
 	picorv32_getq_insn(x1, q0)
-	sw x1,   0*4(x2)
+	sw x1,   0*4(sp)            // Q0 = return address from IRQ vector
+
+	picorv32_getq_insn(x1, q2)
+	sw x1,   1*4(sp)            // Q2 = X1 = RA
+
+	picorv32_getq_insn(x1, q3)
+	sw x1,   2*4(sp)            // Q3 = SP
+
+	sw x3,   3*4(sp)
+	sw x4,   4*4(sp)
+	sw x5,   5*4(sp)
+	sw x6,   6*4(sp)
+	sw x7,   7*4(sp)
+	sw x8,   8*4(sp)
+	sw x9,   9*4(sp)
+	sw x10, 10*4(sp)
+	sw x11, 11*4(sp)
+	sw x12, 12*4(sp)
+	sw x13, 13*4(sp)
+	sw x14, 14*4(sp)
+	sw x15, 15*4(sp)
+	sw x16, 16*4(sp)
+	sw x17, 17*4(sp)
+	sw x18, 18*4(sp)
+	sw x19, 19*4(sp)
+	sw x20, 20*4(sp)
+	sw x21, 21*4(sp)
+	sw x22, 22*4(sp)
+	sw x23, 23*4(sp)
+	sw x24, 24*4(sp)
+	sw x25, 25*4(sp)
+	sw x26, 26*4(sp)
+	sw x27, 27*4(sp)
+	sw x28, 28*4(sp)
+	sw x29, 29*4(sp)
+	sw x30, 30*4(sp)
+	sw x31, 31*4(sp)
 
 
-	//picorv32_getq_insn(x1, q2)
-	lw x1, 4(zero)
-	sw x1,   1*4(x2)
-
-	//picorv32_getq_insn(x1, q3)
-	lw x1, 8(zero)
-	sw x1,   2*4(x2)
-
-	sw x3,   3*4(x2)
-	sw x4,   4*4(x2)
-	sw x5,   5*4(x2)
-	sw x6,   6*4(x2)
-	sw x7,   7*4(x2)
-	sw x8,   8*4(x2)
-	sw x9,   9*4(x2)
-	sw x10, 10*4(x2)
-	sw x11, 11*4(x2)
-	sw x12, 12*4(x2)
-	sw x13, 13*4(x2)
-	sw x14, 14*4(x2)
-	sw x15, 15*4(x2)
-	sw x16, 16*4(x2)
-	sw x17, 17*4(x2)
-	sw x18, 18*4(x2)
-	sw x19, 19*4(x2)
-	sw x20, 20*4(x2)
-	sw x21, 21*4(x2)
-	sw x22, 22*4(x2)
-	sw x23, 23*4(x2)
-	sw x24, 24*4(x2)
-	sw x25, 25*4(x2)
-	sw x26, 26*4(x2)
-	sw x27, 27*4(x2)
-	sw x28, 28*4(x2)
-	sw x29, 29*4(x2)
-	sw x30, 30*4(x2)
-	sw x31, 31*4(x2)
 
 	/* call interrupt handler C function */
 
-	// arg0 = interrupt type bitmask
-	picorv32_getq_insn(a0, q1)
-
 	// arg1 = pointer to stored registers
-	mv a1, x2
+	mv x11, sp
+
+	// arg0 = interrupt type bitmask
+	picorv32_getq_insn(x10, q1)					// Q1 contains bitmask of interrupts that were triggered
+
+	// make some room on the stack for the interrupt handler
+	addi sp, sp, 384   // 128 bytes for register file, 256 bytes for interrupt handler stack
 
 	// load irq handler address to x1 (ra)
-	lw x1, 0(zero)
+	la ra, irq_handler
 
 	// call to C function
-	beq x0, x1, 1f
-	jalr x1, x1, 0
-1:
+	beq zero, ra, cleanup  // if ra is a null pointer, don't jump to it
+	jalr ra, ra, 0         // jump to [ra], and at the same time, load RA with return address
+
+cleanup:
+
+	//addi sp, sp, -384
+	addi sp, zero, 0
 
 	/* restore registers */
+	lw x1,   0*4(sp)
+	picorv32_setq_insn(q0, x1)	// Q0
 
-	lw x1,   0*4(x2)
-	picorv32_setq_insn(q0, x1)
+	lw x1,   1*4(sp)
+	picorv32_setq_insn(q3, x1)   // RA
 
+	lw x1,   2*4(sp)
+	picorv32_setq_insn(q2, x1)   // SP
 
-	lw x1,   1*4(x2)
-	picorv32_setq_insn(q1, x1)
+	lw x3,   3*4(sp)
+	lw x4,   4*4(sp)
+	lw x5,   5*4(sp)
+	lw x6,   6*4(sp)
+	lw x7,   7*4(sp)
+	lw x8,   8*4(sp)
+	lw x9,   9*4(sp)
+	lw x10, 10*4(sp)
+	lw x11, 11*4(sp)
+	lw x12, 12*4(sp)
+	lw x13, 13*4(sp)
+	lw x14, 14*4(sp)
+	lw x15, 15*4(sp)
+	lw x16, 16*4(sp)
+	lw x17, 17*4(sp)
+	lw x18, 18*4(sp)
+	lw x19, 19*4(sp)
+	lw x20, 20*4(sp)
+	lw x21, 21*4(sp)
+	lw x22, 22*4(sp)
+	lw x23, 23*4(sp)
+	lw x24, 24*4(sp)
+	lw x25, 25*4(sp)
+	lw x26, 26*4(sp)
+	lw x27, 27*4(sp)
+	lw x28, 28*4(sp)
+	lw x29, 29*4(sp)
+	lw x30, 30*4(sp)
+	lw x31, 31*4(sp)
 
-	lw x1,   2*4(x2)
-	//picorv32_setq_insn(q2, x1)
-	sw x1, 4(zero)
+	picorv32_getq_insn(x1, q3)
+	picorv32_getq_insn(x2, q2)
 
-
-	lw x3,   3*4(x2)
-	lw x4,   4*4(x2)
-	lw x5,   5*4(x2)
-	lw x6,   6*4(x2)
-	lw x7,   7*4(x2)
-	lw x8,   8*4(x2)
-	lw x9,   9*4(x2)
-	lw x10, 10*4(x2)
-	lw x11, 11*4(x2)
-	lw x12, 12*4(x2)
-	lw x13, 13*4(x2)
-	lw x14, 14*4(x2)
-	lw x15, 15*4(x2)
-	lw x16, 16*4(x2)
-	lw x17, 17*4(x2)
-	lw x18, 18*4(x2)
-	lw x19, 19*4(x2)
-	lw x20, 20*4(x2)
-	lw x21, 21*4(x2)
-	lw x22, 22*4(x2)
-	lw x23, 23*4(x2)
-	lw x24, 24*4(x2)
-	lw x25, 25*4(x2)
-	lw x26, 26*4(x2)
-	lw x27, 27*4(x2)
-	lw x28, 28*4(x2)
-	lw x29, 29*4(x2)
-	lw x30, 30*4(x2)
-	lw x31, 31*4(x2)
-
-	picorv32_getq_insn(x1, q1)
-	//picorv32_getq_insn(x2, q2)
-	lw x2, 4(zero)
-
-		//mv a0, x2
-		//call debug
- 	nop
-	nop
-	nop	
 	picorv32_retirq_insn()
-
-
 
 /* Main program
  **********************************/
 
 start:
-	/* zero-initialize all registers */
+	# zero initialize entire scratchpad memory
+	li a0, 0x00000000
+	li a1, 0x00001000
+setmemloop:
+	sw a0, 0(a0)
+	addi a0, a0, 4
+	blt a0, a1, setmemloop
 
+	# copy data section
+	la a0, _sidata
+	la a1, _sdata
+	la a2, _edata
+	bge a1, a2, end_init_data
+loop_init_data:
+	lw a3, 0(a0)
+	sw a3, 0(a1)
+	addi a0, a0, 4
+	addi a1, a1, 4
+	blt a1, a2, loop_init_data
+end_init_data:
+
+	# zero-initialize register file
 	addi x1, zero, 0
-	//addi x2, zero, 0
+	# x2 (sp) is initialized by reset
 	addi x3, zero, 0
 	addi x4, zero, 0
 	addi x5, zero, 0
@@ -209,11 +200,11 @@ start:
 	addi x30, zero, 0
 	addi x31, zero, 0
 
-
-        call main
+	lui sp, %hi(0x400);
+	addi sp, sp, %lo(0x400);
+	# call main
+	call main
 loop:
-        j loop
+	j loop
 
-
-
-
+.balign 4

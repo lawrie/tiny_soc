@@ -17,11 +17,13 @@
  *
  */
 
+`ifndef PICORV32_REGS
 `ifdef PICORV32_V
 `error "picosoc.v must be read before picorv32.v!"
 `endif
 
 `define PICORV32_REGS picosoc_regs
+`endif
 
 module picosoc (
 	input clk,
@@ -59,10 +61,18 @@ module picosoc (
 	input  flash_io2_di,
 	input  flash_io3_di
 );
+	parameter [0:0] BARREL_SHIFTER = 1;
+	parameter [0:0] ENABLE_MULDIV = 1;
+	parameter [0:0] ENABLE_COMPRESSED = 1;
+	parameter [0:0] ENABLE_COUNTERS = 1;
+	parameter [0:0] ENABLE_IRQ_QREGS = 0;
+	parameter [0:0] ENABLE_IRQ = 1;
+	parameter [0:0] ENABLE_TWO_STAGE_SHIFT = 1;
+
 	parameter integer MEM_WORDS = 256;
 	parameter [31:0] STACKADDR = (4*MEM_WORDS);       // end of memory
-	parameter [31:0] PROGADDR_RESET = 32'h 0005_0000; // 1 MB into flash
-	parameter [31:0] PROGADDR_IRQ = 32'h 0005_0010; // 1 MB into flash
+	parameter [31:0] PROGADDR_RESET = 32'h 0010_0000; // 1 MB into flash
+	parameter [31:0] PROGADDR_IRQ = 32'h 0000_0000;
 
 	reg [31:0] irq;
 	wire irq_stall = 0;
@@ -91,7 +101,7 @@ module picosoc (
 	reg ram_ready;
 	wire [31:0] ram_rdata;
 
-	assign iomem_valid = mem_valid && (mem_addr[31:24] > 8'h 01);
+	assign iomem_valid = mem_valid && (mem_addr[31:24] > 8'h 02);
 	assign iomem_wstrb = mem_wstrb;
 	assign iomem_addr = mem_addr;
 	assign iomem_wdata = mem_wdata;
@@ -117,12 +127,14 @@ module picosoc (
 		.STACKADDR(STACKADDR),
 		.PROGADDR_RESET(PROGADDR_RESET),
 		.PROGADDR_IRQ(PROGADDR_IRQ),
-		.BARREL_SHIFTER(1),
-		.COMPRESSED_ISA(1),
-		.ENABLE_MUL(1),
-		.ENABLE_DIV(1),
-		.ENABLE_IRQ(1),
-		.ENABLE_IRQ_QREGS(1)
+		.BARREL_SHIFTER(BARREL_SHIFTER),
+		.COMPRESSED_ISA(ENABLE_COMPRESSED),
+		.ENABLE_COUNTERS(ENABLE_COUNTERS),
+		.ENABLE_MUL(ENABLE_MULDIV),
+		.ENABLE_DIV(ENABLE_MULDIV),
+		.ENABLE_IRQ(ENABLE_IRQ),
+		.ENABLE_IRQ_QREGS(ENABLE_IRQ_QREGS),
+		.TWO_STAGE_SHIFT(ENABLE_TWO_STAGE_SHIFT)
 	) cpu (
 		.clk         (clk        ),
 		.resetn      (resetn     ),
@@ -209,13 +221,14 @@ module picosoc_regs (
 	output [31:0] rdata1,
 	output [31:0] rdata2
 );
-	reg [31:0] regs [0:31];
+//	reg [31:0] regs [0:31];
+	reg [31:0] regs [0:63];
 
 	always @(posedge clk)
-		if (wen) regs[waddr[4:0]] <= wdata;
+		if (wen) regs[waddr[5:0]] <= wdata;
 
-	assign rdata1 = regs[raddr1[4:0]];
-	assign rdata2 = regs[raddr2[4:0]];
+	assign rdata1 = regs[raddr1[5:0]];
+	assign rdata2 = regs[raddr2[5:0]];
 endmodule
 
 module picosoc_mem #(
@@ -237,4 +250,3 @@ module picosoc_mem #(
 		if (wen[3]) mem[addr][31:24] <= wdata[31:24];
 	end
 endmodule
-

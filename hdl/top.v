@@ -32,7 +32,7 @@ module top (
     inout  flash_io2,
     inout  flash_io3,
 
-`ifdef audio
+`ifdef pdm_audio
     // Audio out pin
     output audio_left,
 `endif
@@ -125,7 +125,7 @@ module top (
     );
 `endif
 
-`ifdef audio
+`ifdef pdm_audio
     reg [11:0] audio_out;
     pdm_dac dac(.clk(clk), .din(audio_out), .dout(audio_left));
 `endif
@@ -211,13 +211,7 @@ module top (
 `endif
 
     always @(posedge clk) begin
-        if (!resetn) begin
-`ifdef gpio
-            gpio <= 0;
-`endif
-        end else begin
-            iomem_ready <= 0;
-
+        begin
 `ifdef gpio
             ///////////////////////////
             // GPIO Peripheral
@@ -236,7 +230,7 @@ module top (
             end
 `endif
 
-`ifdef audio
+`ifdef pdm_audio
             ///////////////////////////
             // Audio Peripheral
             ///////////////////////////

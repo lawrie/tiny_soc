@@ -3,7 +3,7 @@ PCF_FILE = ../../hdl/pins.pcf
 LDS_FILE = ../../firmware/sections.lds
 START_FILE = ../../firmware/start.S
 C_FILES = main.c
-DEFINES = -Daudio -Dgpio
+DEFINES = -Dpdm_audio -Dgpio
 INCLUDE_DIR = ../../libraries
 
 include ../../hdl/tiny_soc.mk

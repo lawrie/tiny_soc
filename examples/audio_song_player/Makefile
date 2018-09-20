@@ -1,15 +1,17 @@
-
-upload: firmware.bin
-		tinyprog -u firmware.bin
-
-firmware.elf: sections.lds start.S firmware.c songplayer.c song_petergun.c uart.c video.c
-	/opt/riscv32i/bin/riscv32-unknown-elf-gcc -march=rv32i -mabi=ilp32 -nostartfiles -Wl,-Bstatic,-T,sections.lds,--strip-debug,-Map=firmware.map,--cref -fno-zero-initialized-in-bss -ffreestanding -nostdlib -o firmware.elf start.S firmware.c songplayer.c song_petergun.c uart.c video.c
-
-firmware.bin: firmware.elf
-	/opt/riscv32i/bin/riscv32-unknown-elf-objcopy -O binary firmware.elf /dev/stdout > firmware.bin
+VERILOG_FILES = ../../hdl/gundy_top.v ../../hdl/picosoc/memory/spimemio.v ../../hdl/picosoc/uart/simpleuart.v ../../hdl/picosoc/picosoc.v ../../hdl/picorv32/picorv32.v ../../hdl/picosoc/gpio_led_gpio_led.v ../../hdl/picosoc/audio/pdm_dac.v 
+PCF_FILE = ../../hdl/pins.pcf
+LDS_FILE = ../../firmware/sections.lds
+START_FILE = ../../firmware/start.S
+C_FILES = firmware.c songplayer.c song_petergun.c uart.c video.c
+DEFINES = 
+INCLUDE_DIR = ../../libraries
 
 %.s : %.c
-	/opt/riscv32i/bin/riscv32-unknown-elf-gcc -march=rv32i -mabi=ilp32 -nostartfiles -Wl,-Bstatic,-T,sections.lds,-Map=firmware.map,--cref  -ffreestanding -nostdlib -fverbose-asm -S $<
+        /opt/riscv32i/bin/riscv32-unknown-elf-gcc -march=rv32i -mabi=ilp32 -nostartfiles -Wl,-Bstatic,-T,sections.lds,-Map=firmware.map,--cref  -ffreestanding -nostdlib -fverbose-asm -S $<
 
-clean:
-	rm -f firmware.elf firmware.hex firmware.bin firmware.o firmware.map
+include ../../hdl/tiny_soc.mk
+
+
+
+
+
