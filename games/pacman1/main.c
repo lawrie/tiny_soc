@@ -13,6 +13,8 @@ extern uint32_t sram;
 #define reg_buttons (*(volatile uint32_t*)0x03000004)
 #define reg_sprite (*(volatile uint32_t*)0x05000000)
 
+extern uint32_t _sidata, _sdata, _edata, _sbss, _ebss, _heap_start;
+
 uint32_t set_irq_mask(uint32_t mask); asm (
     ".global set_irq_mask\n"
     "set_irq_mask:\n"
@@ -146,10 +148,10 @@ void main() {
             print_hex(jy, 2);
             print("\n");
             uint8_t prop = cell[sprite_y][sprite_x];
-            if (jx > 0xc0 && (prop & CAN_GO_RIGHT)) sprite_x = (sprite_x + 1) % 31;
-            else if (jx < 0x40 && (prop & CAN_GO_LEFT) ) sprite_x = (sprite_x - 1) % 31;
-            else if (jy < 0x40 && (prop & CAN_GO_DOWN)) sprite_y = (sprite_y + 1) % 29;
-            else if (jy > 0xc0 && (prop & CAN_GO_UP)) sprite_y = (sprite_y - 1) % 29;
+            if (jx > 0xc0 && (prop & CAN_GO_RIGHT)) sprite_x = (sprite_x + 1) & 0x3f;
+            else if (jx < 0x40 && (prop & CAN_GO_LEFT) ) sprite_x = (sprite_x - 1) & 0x3f;
+            else if (jy < 0x40 && (prop & CAN_GO_DOWN)) sprite_y = (sprite_y + 1) & 0x3f;
+            else if (jy > 0xc0 && (prop & CAN_GO_UP)) sprite_y = (sprite_y - 1) & 0x3f;
             print("Sprite x is ");
             print_hex(sprite_x, 8);
             print(", Sprite y is ");
