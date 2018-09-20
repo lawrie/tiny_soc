@@ -1,14 +1,11 @@
-`ifndef __TILE_MEMORY__
-`define __TILE_MEMORY__
-
-// 6 BRAMS
-module tile_memory (
+// 3 BRAMS
+module texture_memory (
     input rclk, wclk, wen, ren,
     input [11:0] waddr, raddr,
-    input [5:0] wdata,
-    output reg [5:0] rdata
+    input [2:0] wdata,
+    output reg [2:0] rdata
 );
-    reg [5:0] mem [0:4095];   // enough memory for 80x50 map of tiles // uses ~6 BRAMS of Ice40
+    reg [2:0] mem [0:4095];   // enough memory for 64 8x8 texture tiles @ 3bpp // uses 4/32 BRAMS of Ice40
     always @(posedge rclk) begin
       if (ren)
         rdata <= mem[raddr];
@@ -19,5 +16,3 @@ module tile_memory (
     end
 endmodule
 
-
-`endif

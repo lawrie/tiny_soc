@@ -1,6 +1,3 @@
-`ifndef __SPRITE_MEMORY__
-`define __SPRITE_MEMORY__
-
 // 4 BRAMS
 module sprite_memory (
     input rclk, wclk, wen, ren,
@@ -19,5 +16,3 @@ module sprite_memory (
     end
 endmodule
 
-
-`endif

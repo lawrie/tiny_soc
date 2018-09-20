@@ -6,15 +6,6 @@
  *  tile memory mapped to 0x0520_0000
  */
 
-`ifndef __GAME_SOC_VIDEO__
-`define __GAME_SOC_VIDEO__
-
-`include "VGASyncGen.vh"
-`include "sprite_memory.vh"
-`include "texture_memory.vh"
-`include "tile_memory.vh"
-`include "sprite.v"
-
 module video
 (
   input resetn,
@@ -197,4 +188,3 @@ module video
 
 endmodule
 
-`endif
