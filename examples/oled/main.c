@@ -27,8 +27,7 @@ uint32_t set_irq_mask(uint32_t mask); asm (
     "ret\n"
 );
 
-void irq_handler(uint32_t irqs, uint32_t* regs) {
-}
+void irq_handler(uint32_t irqs, uint32_t* regs) { }
 
 void send_cmd(uint8_t r) {
 	reg_cs = 1;

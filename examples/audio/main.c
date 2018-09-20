@@ -18,8 +18,7 @@ uint32_t set_irq_mask(uint32_t mask); asm (
     "ret\n"
 );
 
-void irq_handler(uint32_t irqs, uint32_t* regs) {
-}
+void irq_handler(uint32_t irqs, uint32_t* regs) { }
 
 void main() {
     reg_uart_clkdiv = 139;
@@ -36,6 +35,7 @@ void main() {
         reg_leds = led_timer >> 16;
         led_timer = led_timer + 1;
 
+        // If the button is pressed, play a tone
 	reg_audio = (reg_buttons & 1 && led_timer & 0x20 ? 0x7ff : 0);
     } 
 }

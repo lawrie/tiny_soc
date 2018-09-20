@@ -18,8 +18,7 @@ uint32_t set_irq_mask(uint32_t mask); asm (
     "ret\n"
 );
 
-void irq_handler(uint32_t irqs, uint32_t* regs) {
-}
+void irq_handler(uint32_t irqs, uint32_t* regs) { }
 
 void main() {
     reg_uart_clkdiv = 139;
@@ -35,9 +34,9 @@ void main() {
     while (1) {
         reg_leds = led_timer >> 16;
         led_timer = led_timer + 1;
-	if ((led_timer & 0xffff) == 0) {
+        if ((led_timer & 0xffff) == 0) {
             print("Buttons: ");
-            print_hex(reg_buttons & 0xff, 8);
+            print_hex(reg_buttons & 0xff, r28);
             print("\n");
         }
     } 

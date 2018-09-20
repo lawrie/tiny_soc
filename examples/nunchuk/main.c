@@ -17,8 +17,7 @@ uint32_t set_irq_mask(uint32_t mask); asm (
     "ret\n"
 );
 
-void irq_handler(uint32_t irqs, uint32_t* regs) {
-}
+void irq_handler(uint32_t irqs, uint32_t* regs) { }
 
 void delay(uint32_t n) {
   for (uint32_t i = 0; i < n; i++) asm volatile ("");

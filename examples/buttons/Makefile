@@ -10,7 +10,3 @@ DEFINES = -Dgpio
 
 include $(HDL_DIR)/tiny_soc.mk
 
-
-
-
-
