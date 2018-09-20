@@ -2,7 +2,7 @@ VERILOG_FILES = ../../hdl/top.v ../../hdl/picosoc/memory/spimemio.v ../../hdl/pi
 PCF_FILE = ../../hdl/pins.pcf
 LDS_FILE = ../../firmware/sections.lds
 START_FILE = ../../firmware/start.S
-C_FILES = main.c ../../libraries/uart/uart.c
+C_FILES = main.c ../../libraries/uart/uart.c ../../libraries/nunchuk/nunchuk.c
 DEFINES = -Dvga -Di2c
 INCLUDE_DIR = ../../libraries
 
