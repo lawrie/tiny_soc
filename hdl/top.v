@@ -18,11 +18,11 @@
  */
 
 module top (
-    input clk,
+    input CLK,
 
     // hardware UART
-    output TX,
-    input RX,
+    output SER_TX,
+    input SER_RX,
 
     // onboard SPI flash interface
     output flash_csb,
@@ -34,7 +34,7 @@ module top (
 
 `ifdef pdm_audio
     // Audio out pin
-    output audio_left,
+    output AUDIO_LEFT,
 `endif
 
 `ifdef i2c
@@ -64,14 +64,14 @@ module top (
     inout  [7:0] buttons,
 
     // onboard LED
-    output user_led,
+    output LED,
 `endif
     
     // onboard USB interface
-    output pin_pu
+    output USBPU
 );
     // Disable USB
-    assign pin_pu = 1'b0;
+    assign USBPU = 1'b0;
 
     ///////////////////////////////////
     // Power-on Reset
@@ -79,7 +79,7 @@ module top (
     reg [5:0] reset_cnt = 0;
     wire resetn = &reset_cnt;
 
-    always @(posedge clk) begin
+    always @(posedge CLK) begin
         reset_cnt <= reset_cnt + !resetn;
     end
   
@@ -114,7 +114,7 @@ module top (
 `ifdef gpio
     reg [31:0] gpio;
     wire [7:0]  gpio_buttons;
-    assign user_led = gpio[0];
+    assign LED = gpio[0];
 
     SB_IO #(
         .PIN_TYPE(6'b 0000_01),
@@ -127,7 +127,7 @@ module top (
 
 `ifdef pdm_audio
     reg [11:0] audio_out;
-    pdm_dac dac(.clk(clk), .din(audio_out), .dout(audio_left));
+    pdm_dac dac(.clk(CLK), .din(audio_out), .dout(AUDIO_LEFT));
 `endif
 
 `ifdef i2c
@@ -138,7 +138,7 @@ module top (
     I2C_master #(.freq(16)) i2c (
         .SDA(sda),
         .SCL(scl),
-        .sys_clock(clk),
+        .sys_clock(CLK),
         .reset(~resetn),
         .ctrl_data(i2c_write_reg),
         .wr_ctrl(i2c_enable),
@@ -151,7 +151,7 @@ module top (
 	reg [31:0] spi_rdata;
 	reg spi_ready;
         spi_oled #(.CLOCK_FREQ_HZ(16000000)) oled (
-            .clk(clk),
+            .clk(CLK),
             .resetn(resetn),
             .ctrl_wr(spi_wr),
             .ctrl_rd(spi_rd),
@@ -171,7 +171,7 @@ module top (
         wire video_active;
         wire pixel_clock;
         VGASyncGen vga_generator(
-            .clk(clk),
+            .clk(CLK),
             .hsync(vga_hsync), 
             .vsync(vga_vsync), 
             .x_px(xpos), 
@@ -210,8 +210,9 @@ module top (
         assign vga_blue= video_active & (on_sprite ? sprite_rgb[0] : rom_rgb[2]);
 `endif
 
-    always @(posedge clk) begin
-        begin
+    always @(posedge CLK) begin
+        if (resetn) begin
+            iomem_ready <= 0;
 `ifdef gpio
             ///////////////////////////
             // GPIO Peripheral
@@ -297,11 +298,11 @@ module top (
         .PROGADDR_IRQ(32'h0005_0010),
         .MEM_WORDS(2048)                // use 2KBytes of block RAM by default
     ) soc (
-        .clk          (clk         ),
+        .clk          (CLK         ),
         .resetn       (resetn      ),
 
-        .ser_tx       (TX       ),
-        .ser_rx       (RX       ),
+        .ser_tx       (SER_TX      ),
+        .ser_rx       (SER_RX      ),
 
         .flash_csb    (flash_csb   ),
         .flash_clk    (flash_clk   ),
