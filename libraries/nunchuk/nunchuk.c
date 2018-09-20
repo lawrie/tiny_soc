@@ -23,11 +23,12 @@ void i2c_send_cmd(uint8_t r, uint8_t d) {
   } while ((status >> 31) != 0);
 }
 
-uint8_t i2c_read(void) {
+uint8_t i2c_read(void) { // Read without write cycle
   uint32_t status;
 
-  reg_i2c_read = (ADDRESS << 17) | 1;
-  for (uint32_t i = 0; i < 100; i++) asm volatile ("");
+  reg_i2c_read = (ADDRESS << 24) | 1;
+  // Nunchuk seems to need a delay
+  for (uint32_t i = 0; i < 100; i++) asm volatile (""); 
 	
   do {
     status = i2c_get_status();

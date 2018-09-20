@@ -73,11 +73,11 @@ endfunction
 
 reg [31:0] ctrl_reg;    // I2C control register
 // Bit definitions:
-//  31    Short write.
-//  30:24 Reserved.  7-bit I2C address of slave.
+//  31    Set for short (one data byte) write. Register-only writes not currently supported.
+//  30:24 7-bit I2C address of slave.
 //  23:16 Register Subaddress
 //  15:8  First data byte. Don't care on read cycles
-//  7:0   Second data byte.  Don't care on read cycles.
+//  7:0   Second data byte. For reads, bit 0 = 1 means read without write cycle 
 
 //reg [31:0] status;      // I2C status register
 // Bit definitions
@@ -239,12 +239,11 @@ else
               // Data byte and final Slave Ack do not apply for reads
               // For Stop then start, SDA must be low after last ack cycle.
               // For repeated start, SDA must be high after last ack cycle.
-              // Read is currently broken
-              if (read)   // reading requires subaddr write then data read
+              if (read)  // Reads with write-cycle write regster first 
                 if (wr_cyc)
-                  shift_reg <= {ctrl_reg[23:17],1'b0,1'b1,ctrl_reg[15:8],1'b1,ctrl_reg[30],7'b0,1'b0,9'b0};
+                  shift_reg <= {ctrl_reg[30:24],1'b0,1'b1,ctrl_reg[23:16],1'b1,ctrl_reg[30],7'b0,1'b0,9'b0};
                 else
-                  shift_reg <= {ctrl_reg[23:17],1'b1,1'b1,8'hff,1'b1,8'b0,1'b0,9'b0};
+                  shift_reg <= {ctrl_reg[30:24],1'b1,1'b1,8'hff,1'b1,8'b0,1'b0,9'b0};
               else                // Writing
                 shift_reg <= {ctrl_reg[30:24], 1'b0, 1'b1, ctrl_reg[23:16],1'b1,ctrl_reg[15:8],1'b1,ctrl_reg[7:0],1'b1};
               bit_count <= 0;
