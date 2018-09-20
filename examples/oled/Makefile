@@ -1,12 +1,14 @@
-VERILOG_FILES = ../../hdl/top.v ../../hdl/picosoc/memory/spimemio.v ../../hdl/picosoc/uart/simpleuart.v ../../hdl/picosoc/picosoc.v ../../hdl/picorv32/picorv32.v ../../hdl/picosoc/spi_oled/spi_oled.v
-PCF_FILE = ../../hdl/pins.pcf
-LDS_FILE = ../../firmware/sections.lds
-START_FILE = ../../firmware/start.S
-C_FILES = main.c ../../libraries/uart/uart.c
-DEFINES = -Doled
+FIRMWARE_DIR = ../../firmware
+HDL_DIR = ../../hdl
 INCLUDE_DIR = ../../libraries
+VERILOG_FILES = $(HDL_DIR)/top.v $(HDL_DIR)/picosoc/memory/spimemio.v $(HDL_DIR)/picosoc/uart/simpleuart.v $(HDL_DIR)/picosoc/picosoc.v $(HDL_DIR)/picorv32/picorv32.v $(HDL_DIR)/picosoc/spi_oled/spi_oled.v
+PCF_FILE = $(HDL_DIR)/pins.pcf
+LDS_FILE = $(FIRMWARE_DIR)/sections.lds
+START_FILE = $(FIRMWARE_DIR)/start.S
+C_FILES = main.c $(INCLUDE_DIR)/uart/uart.c
+DEFINES = -Doled
 
-include ../../hdl/tiny_soc.mk
+include $(HDL_DIR)/tiny_soc.mk
 
 
 

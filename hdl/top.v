@@ -25,12 +25,12 @@ module top (
     input SER_RX,
 
     // onboard SPI flash interface
-    output flash_csb,
-    output flash_clk,
-    inout  flash_io0,
-    inout  flash_io1,
-    inout  flash_io2,
-    inout  flash_io3,
+    output SPI_SS,
+    output SPI_SCK,
+    inout  SPI_IO0,
+    inout  SPI_IO1,
+    inout  SPI_IO2,
+    inout  SPI_IO3,
 
 `ifdef pdm_audio
     // Audio out pin
@@ -39,29 +39,29 @@ module top (
 
 `ifdef i2c
     // I2C pins
-    inout sda,
-    inout scl,
+    inout I2C_SDA,
+    inout I2C_SCL,
 `endif
     
 `ifdef oled
-    inout spi_scl,
-    inout spi_sda,
-    inout spi_res,
-    inout spi_dc,
-    inout spi_cs,
+    inout OLED_SPI_SCL,
+    inout OLED_SPI_SDA,
+    inout OLED_SPI_RES,
+    inout OLED_SPI_DC,
+    inout OLED_SPI_CS,
 `endif
 
 `ifdef vga
-    output vga_vsync,
-    output vga_hsync,
-    output vga_red,
-    output vga_green,
-    output vga_blue,
+    output VGA_VSYNC,
+    output VGA_HSYNC,
+    output VGA_R,
+    output VGA_G,
+    output VGA_B,
 `endif
 
 `ifdef gpio
     // GPIO buttons
-    inout  [7:0] buttons,
+    inout  [7:0] BUTTONS,
 
     // onboard LED
     output LED,
@@ -95,7 +95,7 @@ module top (
         .PIN_TYPE(6'b 1010_01),
         .PULLUP(1'b 0)
     ) flash_io_buf [3:0] (
-        .PACKAGE_PIN({flash_io3, flash_io2, flash_io1, flash_io0}),
+        .PACKAGE_PIN({SPI_IO3, SPI_IO2, SPI_IO1, SPI_IO0}),
         .OUTPUT_ENABLE({flash_io3_oe, flash_io2_oe, flash_io1_oe, flash_io0_oe}),
         .D_OUT_0({flash_io3_do, flash_io2_do, flash_io1_do, flash_io0_do}),
         .D_IN_0({flash_io3_di, flash_io2_di, flash_io1_di, flash_io0_di})
@@ -120,7 +120,7 @@ module top (
         .PIN_TYPE(6'b 0000_01),
         .PULLUP(1'b 1)
     ) buttons_input [7:0] (
-        .PACKAGE_PIN(buttons),
+        .PACKAGE_PIN(BUTTONS),
         .D_IN_0(gpio_buttons)
     );
 `endif
@@ -136,8 +136,8 @@ module top (
     reg [31:0] i2c_read_reg;
 
     I2C_master #(.freq(16)) i2c (
-        .SDA(sda),
-        .SCL(scl),
+        .SDA(I2C_SDA),
+        .SCL(I2C_SCL),
         .sys_clock(CLK),
         .reset(~resetn),
         .ctrl_data(i2c_write_reg),
@@ -159,11 +159,11 @@ module top (
             .ctrl_wdat(iomem_wdata),
             .ctrl_rdat(spi_rdata),
             .ctrl_done(spi_ready),
-            .mosi(spi_sda),
-            .sclk(spi_scl),
-            .cs(spi_cs),
-            .dc(spi_dc),
-            .rst(spi_res));
+            .mosi(OLED_SPI_SDA),
+            .sclk(OLED_SPI_SCL),
+            .cs(OLED_SPI_CS),
+            .dc(OLED_SPI_DC),
+            .rst(OLED_SPI_RES));
 `endif
 
 `ifdef vga
@@ -172,8 +172,8 @@ module top (
         wire pixel_clock;
         VGASyncGen vga_generator(
             .clk(CLK),
-            .hsync(vga_hsync), 
-            .vsync(vga_vsync), 
+            .hsync(VGA_HSYNC), 
+            .vsync(VGA_VSYNC), 
             .x_px(xpos), 
             .y_px(ypos), 
             .activevideo(video_active), 
@@ -205,9 +205,9 @@ module top (
         wire on_sprite = (xpos >= sprite_x && xpos < sprite_x + 32 &&
                           ypos >= sprite_y && ypos < sprite_y + 32);
  
-        assign vga_red = video_active & (on_sprite ? sprite_rgb[2] : rom_rgb[0]);
-        assign vga_green = video_active & (on_sprite ? sprite_rgb[1] :rom_rgb[1]);
-        assign vga_blue= video_active & (on_sprite ? sprite_rgb[0] : rom_rgb[2]);
+        assign VGA_R = video_active & (on_sprite ? sprite_rgb[2] : rom_rgb[0]);
+        assign VGA_G = video_active & (on_sprite ? sprite_rgb[1] :rom_rgb[1]);
+        assign VGA_B = video_active & (on_sprite ? sprite_rgb[0] : rom_rgb[2]);
 `endif
 
     always @(posedge CLK) begin
@@ -304,8 +304,8 @@ module top (
         .ser_tx       (SER_TX      ),
         .ser_rx       (SER_RX      ),
 
-        .flash_csb    (flash_csb   ),
-        .flash_clk    (flash_clk   ),
+        .flash_csb    (SPI_SS      ),
+        .flash_clk    (SPI_SCK     ),
 
         .flash_io0_oe (flash_io0_oe),
         .flash_io1_oe (flash_io1_oe),

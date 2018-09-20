@@ -1,15 +1,18 @@
-VERILOG_FILES = ../../hdl/gundy_top.v ../../hdl/picosoc/memory/spimemio.v ../../hdl/picosoc/uart/simpleuart.v ../../hdl/picosoc/picosoc.v ../../hdl/picorv32/picorv32.v ../../hdl/picosoc/gpio_led_gpio_led.v ../../hdl/picosoc/audio/pdm_dac.v 
-PCF_FILE = ../../hdl/pins.pcf
-LDS_FILE = ../../firmware/sections.lds
-START_FILE = ../../firmware/start.S
-C_FILES = firmware.c songplayer.c song_petergun.c uart.c video.c
-DEFINES = 
+HDL_DIR = ../../hdl
+PICOSOC_DIR = $(HDL_DIR)/picosoc
+FIRMWARE_DIR = ../../firmware
 INCLUDE_DIR = ../../libraries
+VERILOG_FILES = ../../hdl/gundy_top.v $(PICOSOC_DIR)/memory/spimemio.v $(PICOSOC_DIR)/uart/simpleuart.v $(PICOSOC_DIR)/picosoc.v ../../hdl/picorv32/picorv32.v $(PICOSOC_DIR)/gpio_led/gpio_led.v $(PICOSOC_DIR)/audio/audio_simple.v $(PICOSOC_DIR)/audio/pdm_dac.v $(PICOSOC_DIR)/audio/clock_divider.v $(PICOSOC_DIR)/video/video.v $(PICOSOC_DIR)/video/VGASyncGen.v $(PICOSOC_DIR)/video/sprite.v $(PICOSOC_DIR)/video/sprite_memory.v $(PICOSOC_DIR)/video/texture_memory.v $(PICOSOC_DIR)/video/tile_memory.v
+PCF_FILE = $(HDL_DIR)/pins.pcf
+LDS_FILE = $(FIRMWARE_DIR)/sections.lds
+START_FILE = $(FIRMWARE_DIR)/start.S
+C_FILES = firmware.c uart.c video.c songplayer.c song_petergun.c
+DEFINES = 
 
 %.s : %.c
-        /opt/riscv32i/bin/riscv32-unknown-elf-gcc -march=rv32i -mabi=ilp32 -nostartfiles -Wl,-Bstatic,-T,sections.lds,-Map=firmware.map,--cref  -ffreestanding -nostdlib -fverbose-asm -S $<
+	/opt/riscv32i/bin/riscv32-unknown-elf-gcc -march=rv32i -mabi=ilp32 -nostartfiles -Wl,-Bstatic,-T,sections.lds,-Map=firmware.map,--cref  -ffreestanding -nostdlib -fverbose-asm -S $<
 
-include ../../hdl/tiny_soc.mk
+include $(HDL_DIR)/tiny_soc.mk
 
 
 

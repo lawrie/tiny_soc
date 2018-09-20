@@ -1,10 +1,12 @@
-VERILOG_FILES = ../../hdl/top.v ../../hdl/picosoc/memory/spimemio.v ../../hdl/picosoc/uart/simpleuart.v ../../hdl/picosoc/picosoc.v ../../hdl/picorv32/picorv32.v ../../hdl/picosoc/audio/pdm_dac.v ../../hdl/picosoc/nunchuk/I2C_master.v
-PCF_FILE = ../../hdl/pins.pcf
-LDS_FILE = ../../firmware/sections.lds
-START_FILE = ../../firmware/start.S
-C_FILES = main.c ../../libraries/uart/uart.c ../../libraries/nunchuk/nunchuk.c
-DEFINES = -Di2c
+FIRMWARE_DIR = ../../firmware
+HDL_DIR = ../../hdl
 INCLUDE_DIR = ../../libraries
+VERILOG_FILES = $(HDL_DIR)/top.v $(HDL_DIR)/picosoc/memory/spimemio.v $(HDL_DIR)/picosoc/uart/simpleuart.v $(HDL_DIR)/picosoc/picosoc.v $(HDL_DIR)/picorv32/picorv32.v $(HDL_DIR)/picosoc/nunchuk/I2C_master.v
+PCF_FILE = $(HDL_DIR)/pins.pcf
+LDS_FILE = $(FIRMWARE_DIR)/sections.lds
+START_FILE = $(FIRMWARE_DIR)/start.S
+C_FILES = main.c $(INCLUDE_DIR)/uart/uart.c $(INCLUDE_DIR)/nunchuk/nunchuk.c
+DEFINES = -Di2c
 
-include ../../hdl/tiny_soc.mk
+include $(HDL_DIR)/tiny_soc.mk
 

@@ -43,55 +43,44 @@ set_io -nowarn SER_RX A1
 
 # Audio
 set_io -nowarn AUDIO_LEFT B1
-set_io -nowarn AUDIO_RIGHT C1
+set_io -nowarn AUDIO_RIGHT B8
 
 # I2C for Nunchuk
-set_io -nowarn sda C2
-set_io -nowarn scl C1
+set_io -nowarn I2C_SDA C2
+set_io -nowarn I2C_SCL C1
 
 # Buttons
-set_io -nowarn buttons[7] D2
-set_io -nowarn buttons[6] D1
-set_io -nowarn buttons[5] E2
-set_io -nowarn buttons[4] A6
-set_io -nowarn buttons[3] B6
-set_io -nowarn buttons[2] A7
-set_io -nowarn buttons[1] B7
-set_io -nowarn buttons[0] A8
+set_io -nowarn BUTTONS[7] D2
+set_io -nowarn BUTTONS[6] D1
+set_io -nowarn BUTTONS[5] E2
+set_io -nowarn BUTTONS[4] A6
+set_io -nowarn BUTTONS[3] B6
+set_io -nowarn BUTTONS[2] A7
+set_io -nowarn BUTTONS[1] B7
+set_io -nowarn BUTTONS[0] A8
 
 # OLED SPI
-set_io -nowarn spi_cs H9
-set_io -nowarn spi_dc D9
-set_io -nowarn spi_res D8
-set_io -nowarn spi_sda C9
-set_io -nowarn spi_scl A9
+set_io -nowarn OLED_SPI_CS H9
+set_io -nowarn OLED_SPI_DC D9
+set_io -nowarn OLED_SPI_RES D8
+set_io -nowarn OLED_SPI_SDA C9
+set_io -nowarn OLED_SPI_SCL A9
 
 # VGA
-set_io -nowarn vga_vsync H2
 set_io -nowarn VGA_VSYNC H2
-set_io -nowarn vga_hsync J1
 set_io -nowarn VGA_HSYNC J1
-set_io -nowarn vga_red H1
 set_io -nowarn VGA_R H1
-set_io -nowarn vga_green G2
 set_io -nowarn VGA_G G2
-set_io -nowarn vga_blue E1
 set_io -nowarn VGA_B E1
 
 set_io -nowarn pin_24 A6
 
 # SPI flash interface on bottom of board
-set_io -nowarn flash_csb F7
 set_io -nowarn SPI_SS F7
-set_io -nowarn flash_clk G7
 set_io -nowarn SPI_SCK G7
-set_io -nowarn flash_io0 G6
 set_io -nowarn SPI_IO0 G6
-set_io -nowarn flash_io1 H7
 set_io -nowarn SPI_IO1 H7
-set_io -nowarn flash_io2 H4
 set_io -nowarn SPI_IO2 H4
-set_io -nowarn flash_io3 J8
 set_io -nowarn SPI_IO3 J8
 
 # General purpose pins on bottom of board
@@ -112,5 +101,4 @@ set_io -nowarn  pin_usbp B4
 set_io -nowarn  pin_usbn A4
 
 # 16MHz clock
-set_io -nowarn clk B2
 set_io -nowarn CLK B2
