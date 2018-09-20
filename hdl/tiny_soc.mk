@@ -11,7 +11,7 @@ hardware.bin: hardware.asc
 	icetime -d hx8k -c 12 -mtr hardware.rpt hardware.asc
 	icepack hardware.asc hardware.bin
 
-firmware.elf: $(C_FILE) 
+firmware.elf: $(C_FILES) 
 	/opt/riscv32i/bin/riscv32-unknown-elf-gcc -march=rv32imc -nostartfiles -Wl,-Bstatic,-T,$(LDS_FILE),--strip-debug,-Map=firmware.map,--cref  -ffreestanding -nostdlib -o firmware.elf -I$(INCLUDE_DIR)  $(START_FILE) $(C_FILES)
 
 firmware.bin: firmware.elf
