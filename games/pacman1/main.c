@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
-#include <uart.h>
-#include "nunchuk.h"
+#include <uart/uart.h>
+#include <nunchuk/nunchuk.h>
 
 // a pointer to this is a null pointer, but the compiler does not
 // know that because "sram" is a linker symbol from sections.lds.
@@ -12,8 +12,6 @@ extern uint32_t sram;
 #define reg_uart_data (*(volatile uint32_t*)0x02000008)
 #define reg_leds (*(volatile uint32_t*)0x03000000)
 #define reg_buttons (*(volatile uint32_t*)0x03000004)
-#define reg_i2c_write (*(volatile uint32_t*)0x07000000)
-#define reg_i2c_read (*(volatile uint32_t*)0x07000004)
 #define reg_sprite (*(volatile uint32_t*)0x05000000)
 
 extern uint32_t _sidata, _sdata, _edata, _sbss, _ebss,_heap_start;

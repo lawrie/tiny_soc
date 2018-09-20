@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
-#include "nunchuk.h"
-#include "uart.h"
+#include <nunchuk/nunchuk.h>
+#include <uart/uart.h>
 
 // a pointer to this is a null pointer, but the compiler does not
 // know that because "sram" is a linker symbol from sections.lds.
