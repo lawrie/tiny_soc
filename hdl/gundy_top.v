@@ -19,14 +19,6 @@
 
 `default_nettype none
 
-`include "./picosoc/gpio_led/gpio_led.vh"
-`include "./picosoc/audio/audio_simple.vh"
-`include "./picosoc/video/video.vh"
-`include "./picosoc/memory/spimemio.v"
-`include "./picosoc/uart/simpleuart.v"
-`include "./picosoc/picosoc.v"
-`include "./picorv32/picorv32.v"
-
  // look in pins.pcf for all the pin names on the TinyFPGA BX board
 module top (
 	input CLK,      // 16MHz clock

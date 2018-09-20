@@ -1,6 +1,3 @@
-`ifndef __TINYFPGA_GAME_SOC_LED__
-`define __TINYFPGA_GAME_SOC_LED__
-
 /*
  * IO mapped module for PicoSOC to drive the TinyFPGA BX LED
  *
@@ -36,4 +33,3 @@ module gpio_led
 
 endmodule
 
-`endif
