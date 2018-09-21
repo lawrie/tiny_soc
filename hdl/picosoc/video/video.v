@@ -20,12 +20,11 @@ module video
   output vga_g,
   output vga_b);
 
-  wire pixel_clock;
   reg[9:0] xpos;
   reg[9:0] ypos;
 
-  reg[8:0] half_xpos = xpos[9:1];
-  reg[8:0] half_ypos = ypos[9:1];
+  wire[8:0] half_xpos = xpos[8:0];  // no longer being halved
+  wire[8:0] half_ypos = ypos[9:1];
 
   wire[8:0] next_xpos = half_xpos+1;
   wire video_active;
@@ -61,13 +60,13 @@ module video
   // need to read ahead with tile memory to prevent edge-artifacts
   wire [11:0] tile_read_address = { effective_y[8:3], effective_next_x[8:3] };
   tile_memory tilemem(
-    .rclk(pixel_clock), .ren(video_active), .raddr(tile_read_address), .rdata(tile_read_data),
+    .rclk(clk), .ren(video_active), .raddr(tile_read_address), .rdata(tile_read_data),
     .wclk(clk), .wen(tilemem_write), .waddr(iomem_addr[13:2]), .wdata(iomem_wdata[5:0])
   );
 
   wire [11:0] texture_read_address = { tile_read_data[5:0], effective_y[2:0], effective_x[2:0] };
   texture_memory texturemem(
-    .rclk(pixel_clock), .ren(video_active), .raddr(texture_read_address), .rdata(texture_read_data),
+    .rclk(clk), .ren(video_active), .raddr(texture_read_address), .rdata(texture_read_data),
     .wclk(clk), .wen(texmem_write), .waddr(iomem_addr[13:2]), .wdata(iomem_wdata[2:0])
   );
 
@@ -139,7 +138,7 @@ module video
   wire sprite_read_data;
 
   sprite_memory spritemem(
-    .rclk(pixel_clock), .ren(video_active), .raddr(sprite_read_address), .rdata(sprite_read_data),
+    .rclk(clk), .ren(video_active), .raddr(sprite_read_address), .rdata(sprite_read_data),
     .wclk(clk), .wen(spritemem_write), .waddr(iomem_addr[15:2]), .wdata(iomem_wdata[0])
   );
 
@@ -182,8 +181,7 @@ module video
     .vsync(vga_vsync),
     .x_px(xpos),
     .y_px(ypos),
-    .activevideo(video_active),
-    .px_clk(pixel_clock)
+    .activevideo(video_active)
   );
 
 endmodule
