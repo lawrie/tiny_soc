@@ -56,7 +56,7 @@ void setup_screen() {
   }
   for (x = 0; x < 32; x++) {
     for (y = 0; y < 32; y++) {
-      vid_set_tile(x,y,tile_data[(y<<6)+x]);
+      vid_set_tile(x,y,tile_data[(y<<5)+x]);
     }
   }
   //vid_random_init_sprite_memory();
@@ -74,16 +74,16 @@ void irq_handler(uint32_t irqs, uint32_t* regs)
 {
   /* fast IRQ (4) */
   if ((irqs & (1<<4)) != 0) {
-		// print_str("[EXT-IRQ-4]");
-	}
+    // print_str("[EXT-IRQ-4]");
+  }
 
   /* slow IRQ (5) */
-	if ((irqs & (1<<5)) != 0) {
+  if ((irqs & (1<<5)) != 0) {
     // print_str("[EXT-IRQ-5]");
-	}
+  }
 
   /* timer IRQ */
-	if ((irqs & 1) != 0) {
+  if ((irqs & 1) != 0) {
     // retrigger timer
     set_timer_counter(counter_frequency);
 
