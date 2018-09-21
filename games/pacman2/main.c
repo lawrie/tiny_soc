@@ -38,8 +38,8 @@ uint32_t set_timer_counter(uint32_t val); asm (
 
 void setup_screen() {
   vid_init();
-  vid_set_x_ofs(32<<3);
-  vid_set_y_ofs(32<<3);
+  vid_set_x_ofs(0);
+  vid_set_y_ofs(0);
   int tex,x,y;
 
   for (tex = 0; tex < 64; tex++) {
@@ -115,17 +115,6 @@ void main() {
     // set timer interrupt to happen 1/50th sec from now
     // (the music routine runs from the timer interrupt)
     set_timer_counter(counter_frequency);
-
-    int xofs = 0;
-    int xincr = 1;
-    int yofs = 0;
-    int yincr = 1;
-
-    int maxx = (63-40) << 3;
-    int maxy = (63-30) << 3;
-
-    vid_set_x_ofs(xofs&511);
-    vid_set_y_ofs(yofs&511);
 
     uint32_t time_waster = 0;
     uint32_t sprite_pos = 0;
