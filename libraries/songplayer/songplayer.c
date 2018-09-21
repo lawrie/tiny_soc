@@ -1,7 +1,7 @@
 #include <stddef.h>
-#include "audio.h"
-#include "songplayer.h"
-#include "uart.h"
+#include <audio/audio.h>
+#include <songplayer/songplayer.h>
+#include <uart/uart.h>
 
 const struct song_t *player_song = NULL;
 struct globalctrl_t globalctrl = {
