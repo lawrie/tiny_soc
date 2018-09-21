@@ -36,7 +36,7 @@ void main() {
         led_timer = led_timer + 1;
         if ((led_timer & 0xffff) == 0) {
             print("Buttons: ");
-            print_hex(reg_buttons & 0xff, r28);
+            print_hex(reg_buttons & 0xff, 2);
             print("\n");
         }
     } 
