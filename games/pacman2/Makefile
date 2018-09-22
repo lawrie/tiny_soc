@@ -6,7 +6,7 @@ VERILOG_FILES = $(HDL_DIR)/game_top.v $(PICOSOC_DIR)/gpio_led/gpio_led.v $(PICOS
 PCF_FILE = $(HDL_DIR)/pins.pcf
 LDS_FILE = $(FIRMWARE_DIR)/sections.lds
 START_FILE = $(FIRMWARE_DIR)/start.S
-C_FILES = main.c $(INCLUDE_DIR)/uart/uart.c $(INCLUDE_DIR)/video/video.c $(INCLUDE_DIR)/songplayer/songplayer.c song_petergun.c
+C_FILES = main.c $(INCLUDE_DIR)/uart/uart.c $(INCLUDE_DIR)/video/video.c $(INCLUDE_DIR)/songplayer/songplayer.c song_pacman.c
 DEFINES = 
 
 %.s : %.c
